@@ -302,10 +302,23 @@ grafico_internacoes = px.line(
 # O modo "x unified" permite visualizar os valores
 # ao passar o mouse sobre determinado período.
 
+# ============================================================
+# CONFIGURAÇÃO VISUAL DO GRÁFICO
+# ============================================================
+
+# Configuramos os elementos visuais do gráfico.
 grafico_internacoes.update_layout(
-    title=None,
+
+    # Remove qualquer título interno do Plotly.
+    # O título da seção já aparece acima pelo Streamlit.
+    title_text="",
+
+    # Define os nomes dos eixos.
     xaxis_title="Período",
     yaxis_title="Internações",
+
+    # Exibe as informações agrupadas ao passar
+    # o mouse sobre determinado período.
     hovermode="x unified"
 )
 
