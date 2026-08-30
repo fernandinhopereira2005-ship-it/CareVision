@@ -501,7 +501,100 @@ st.plotly_chart(
     use_container_width=True
 )
 # ============================================================
-# 12. OBSERVAÇÃO METODOLÓGICA
+# 12. TABELA ANALÍTICA NACIONAL
+# ============================================================
+
+# A tabela permite visualizar todas as Unidades da Federação
+# no período selecionado, não apenas as 10 primeiras do ranking.
+#
+# Ela complementa o gráfico e ajuda o usuário a analisar
+# os indicadores de forma mais detalhada.
+
+st.divider()
+
+st.subheader(
+    f"📋 Visão Analítica Nacional — {periodo_selecionado}"
+)
+
+
+# ------------------------------------------------------------
+# PREPARAÇÃO DOS DADOS
+# ------------------------------------------------------------
+
+# Selecionamos apenas as colunas mais importantes
+# para a análise dentro do dashboard.
+
+tabela_nacional = dados[
+    dados["periodo"] == periodo_selecionado
+][
+    [
+        "uf",
+        "internacoes",
+        "leitos_sus",
+        "internacoes_por_leito",
+        "variacao_percentual",
+        "indice_pressao",
+        "nivel_pressao"
+    ]
+].copy()
+
+
+# ------------------------------------------------------------
+# ORDENAÇÃO
+# ------------------------------------------------------------
+
+# Ordenamos da maior para a menor pressão hospitalar.
+#
+# Os registros sem índice, quando existirem,
+# aparecerão ao final da tabela.
+
+tabela_nacional = tabela_nacional.sort_values(
+    "indice_pressao",
+    ascending=False,
+    na_position="last"
+)
+
+
+# ------------------------------------------------------------
+# RENOMEAÇÃO DAS COLUNAS
+# ------------------------------------------------------------
+
+# Renomeamos as colunas para deixar os títulos
+# mais amigáveis para o usuário do dashboard.
+
+tabela_nacional = tabela_nacional.rename(
+    columns={
+        "uf": "UF",
+        "internacoes": "Internações",
+        "leitos_sus": "Leitos SUS",
+        "internacoes_por_leito": "Internações / leito",
+        "variacao_percentual": "Variação mensal (%)",
+        "indice_pressao": "Índice de Pressão",
+        "nivel_pressao": "Nível de Pressão"
+    }
+)
+
+
+# ------------------------------------------------------------
+# EXIBIÇÃO DA TABELA
+# ------------------------------------------------------------
+
+# O dataframe do Streamlit permite rolagem e ordenação
+# diretamente pelo usuário.
+#
+# hide_index=True:
+# remove a coluna numérica de índice do Pandas.
+#
+# use_container_width=True:
+# utiliza toda a largura disponível.
+
+st.dataframe(
+    tabela_nacional,
+    use_container_width=True,
+    hide_index=True
+)
+# ============================================================
+# 13. OBSERVAÇÃO METODOLÓGICA
 # ============================================================
 
 st.divider()
