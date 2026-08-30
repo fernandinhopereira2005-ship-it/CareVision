@@ -7,9 +7,17 @@
 
 # Este arquivo contém a interface principal do MVP CareVision.
 #
-# A aplicação consome a base analítica consolidada gerada pelo
-# pipeline de tratamento e disponibiliza indicadores, gráficos,
-# ranking e comparações entre as Unidades da Federação.
+# A aplicação utiliza a base analítica consolidada gerada
+# pelo pipeline de tratamento de dados e apresenta:
+#
+# - indicadores hospitalares;
+# - evolução temporal;
+# - Índice de Pressão Hospitalar;
+# - ranking nacional;
+# - comparações entre UFs;
+# - análises de demanda e capacidade;
+# - tendências recentes;
+# - tabela analítica nacional.
 
 
 # ============================================================
@@ -17,19 +25,19 @@
 # ============================================================
 
 # Streamlit:
-# utilizado para construir a interface web.
+# construção da aplicação web.
 import streamlit as st
 
 # Pandas:
-# utilizado para leitura, organização e filtragem dos dados.
+# leitura, organização e filtragem dos dados.
 import pandas as pd
 
 # Plotly Express:
-# utilizado para construção dos gráficos interativos.
+# criação de gráficos interativos.
 import plotly.express as px
 
 # Dedent:
-# remove a indentação extra de strings multilinha.
+# remove indentação extra de strings HTML multilinha.
 from textwrap import dedent
 
 
@@ -55,7 +63,7 @@ st.markdown(
         <style>
 
         /* ===================================================
-           CONFIGURAÇÃO GERAL DA PÁGINA
+           CONFIGURAÇÃO GERAL
            =================================================== */
 
         .stApp {
@@ -77,12 +85,13 @@ st.markdown(
             background-color: #0D2948;
         }
 
-        [data-testid="stSidebar"] * {
-            color: #FFFFFF;
-        }
-
+        [data-testid="stSidebar"] h1,
+        [data-testid="stSidebar"] h2,
+        [data-testid="stSidebar"] h3,
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] span,
         [data-testid="stSidebar"] label {
-            font-weight: 600;
+            color: #FFFFFF;
         }
 
 
@@ -91,6 +100,7 @@ st.markdown(
            =================================================== */
 
         .carevision-header {
+
             background:
                 linear-gradient(
                     120deg,
@@ -100,32 +110,50 @@ st.markdown(
                 );
 
             padding: 28px 34px;
+
             border-radius: 18px;
+
             margin-bottom: 24px;
 
             box-shadow:
                 0px 8px 24px rgba(13, 41, 72, 0.14);
         }
 
+
         .carevision-brand {
+
             color: #FFFFFF;
+
             font-size: 34px;
+
             font-weight: 750;
+
             margin: 0;
+
             letter-spacing: -0.5px;
         }
 
+
         .carevision-subtitle {
+
             color: #D9EAF3;
+
             font-size: 17px;
+
             margin-top: 6px;
+
             margin-bottom: 0px;
         }
 
+
         .carevision-source {
+
             color: #AFC8DA;
+
             font-size: 13px;
+
             margin-top: 12px;
+
             margin-bottom: 0px;
         }
 
@@ -135,94 +163,145 @@ st.markdown(
            =================================================== */
 
         .section-label {
+
             color: #087F8C;
+
             font-size: 12px;
+
             font-weight: 700;
+
             letter-spacing: 1.3px;
+
             text-transform: uppercase;
+
             margin-bottom: 3px;
         }
 
+
         .section-title {
+
             color: #102A43;
+
             font-size: 24px;
+
             font-weight: 700;
+
             margin-bottom: 4px;
         }
 
+
         .section-description {
+
             color: #68798A;
+
             font-size: 14px;
+
             margin-bottom: 18px;
         }
 
 
         /* ===================================================
-           CARDS DOS INDICADORES
+           CARDS DOS KPIs
            =================================================== */
 
         .kpi-card {
+
             background-color: #FFFFFF;
+
             border: 1px solid #E7ECF1;
+
             border-radius: 15px;
+
             padding: 19px 20px;
+
             min-height: 126px;
 
             box-shadow:
                 0px 3px 12px rgba(22, 45, 66, 0.06);
         }
 
+
         .kpi-label {
+
             color: #718096;
+
             font-size: 12px;
+
             font-weight: 650;
+
             letter-spacing: 0.6px;
+
             text-transform: uppercase;
+
             margin-bottom: 9px;
         }
 
+
         .kpi-value {
+
             color: #102A43;
+
             font-size: 27px;
+
             font-weight: 750;
+
             margin-bottom: 4px;
         }
 
+
         .kpi-description {
+
             color: #98A6B3;
+
             font-size: 11px;
         }
 
 
         /* ===================================================
-           CARD DE STATUS DO IPH
+           CARD DE STATUS
            =================================================== */
 
         .status-card {
+
             border-radius: 15px;
+
             padding: 20px 24px;
+
             min-height: 126px;
 
             box-shadow:
                 0px 3px 12px rgba(22, 45, 66, 0.06);
         }
 
+
         .status-label {
+
             font-size: 12px;
+
             font-weight: 700;
+
             text-transform: uppercase;
+
             letter-spacing: 0.7px;
+
             margin-bottom: 7px;
         }
 
+
         .status-value {
+
             font-size: 25px;
+
             font-weight: 800;
+
             margin-bottom: 4px;
         }
 
+
         .status-description {
+
             font-size: 11px;
+
             opacity: 0.80;
         }
 
@@ -232,33 +311,52 @@ st.markdown(
            =================================================== */
 
         .context-card {
+
             background-color: #FFFFFF;
+
             border: 1px solid #E7ECF1;
+
             border-radius: 14px;
+
             padding: 16px 18px;
 
             box-shadow:
                 0px 2px 10px rgba(22, 45, 66, 0.05);
         }
 
+
         .context-label {
+
             color: #718096;
+
             font-size: 11px;
+
             font-weight: 650;
+
             text-transform: uppercase;
+
             letter-spacing: 0.5px;
         }
 
+
         .context-value {
+
             color: #102A43;
+
             font-size: 21px;
+
             font-weight: 750;
+
             margin-top: 4px;
         }
 
+
         .context-caption {
+
             color: #98A6B3;
+
             font-size: 11px;
+
             margin-top: 3px;
         }
 
@@ -268,9 +366,13 @@ st.markdown(
            =================================================== */
 
         [data-testid="stPlotlyChart"] {
+
             background-color: #FFFFFF;
+
             border: 1px solid #E7ECF1;
+
             border-radius: 16px;
+
             padding: 7px;
 
             box-shadow:
@@ -279,11 +381,13 @@ st.markdown(
 
 
         /* ===================================================
-           TABELA
+           DATAFRAME
            =================================================== */
 
         [data-testid="stDataFrame"] {
+
             background-color: #FFFFFF;
+
             border-radius: 14px;
 
             box-shadow:
@@ -292,26 +396,19 @@ st.markdown(
 
 
         /* ===================================================
-           DIVISORES
-           =================================================== */
-
-        hr {
-            border: none;
-            border-top: 1px solid #E7ECF1;
-            margin-top: 28px;
-            margin-bottom: 28px;
-        }
-
-
-        /* ===================================================
            RODAPÉ
            =================================================== */
 
         .carevision-footer {
+
             text-align: center;
+
             color: #8291A1;
+
             font-size: 12px;
+
             padding-top: 15px;
+
             padding-bottom: 10px;
         }
 
@@ -323,13 +420,14 @@ st.markdown(
 
 
 # ============================================================
-# 4. CARREGAMENTO DA BASE ANALÍTICA
+# 4. CARREGAMENTO DA BASE
 # ============================================================
 
 dados = pd.read_csv(
     "carevision_base_final.csv",
     encoding="utf-8-sig"
 )
+
 
 # Converte a coluna de data para datetime.
 dados["data"] = pd.to_datetime(
@@ -343,33 +441,38 @@ dados["data"] = pd.to_datetime(
 # ============================================================
 
 def formatar_inteiro(valor):
+
     """
     Formata valores inteiros utilizando ponto
-    como separador de milhar no padrão brasileiro.
+    como separador de milhar.
     """
 
     if pd.isna(valor):
+
         return "Sem dado"
 
     return f"{valor:,.0f}".replace(",", ".")
 
 
 def formatar_decimal(valor, casas=2):
+
     """
     Formata valores decimais utilizando vírgula
     como separador decimal.
     """
 
     if pd.isna(valor):
+
         return "Sem dado"
 
     return f"{valor:.{casas}f}".replace(".", ",")
 
 
 def obter_estilo_pressao(nivel):
+
     """
-    Define as cores utilizadas no card de classificação
-    de acordo com o nível de pressão hospitalar.
+    Retorna as cores associadas a cada nível
+    de pressão hospitalar.
     """
 
     estilos = {
@@ -412,9 +515,9 @@ def obter_estilo_pressao(nivel):
 
 
 def renderizar_html(conteudo):
+
     """
-    Renderiza os componentes HTML personalizados
-    utilizados na interface do CareVision.
+    Renderiza elementos HTML personalizados.
     """
 
     conteudo_limpo = dedent(conteudo)
@@ -423,7 +526,25 @@ def renderizar_html(conteudo):
 
 
 # ============================================================
-# 6. CABEÇALHO PRINCIPAL
+# 6. CORES DOS NÍVEIS DE PRESSÃO
+# ============================================================
+
+cores_pressao = {
+
+    "Baixa": "#2CA66F",
+
+    "Moderada": "#E5B52E",
+
+    "Alta": "#E98532",
+
+    "Crítica": "#D94A4A",
+
+    "Sem dado": "#9AA5B1"
+}
+
+
+# ============================================================
+# 7. CABEÇALHO
 # ============================================================
 
 renderizar_html(
@@ -448,7 +569,7 @@ renderizar_html(
 
 
 # ============================================================
-# 7. BARRA LATERAL
+# 8. SIDEBAR
 # ============================================================
 
 st.sidebar.markdown(
@@ -465,56 +586,74 @@ st.sidebar.divider()
 
 
 # ============================================================
-# 8. FILTRO DE PERÍODO
+# 9. FILTRO DE PERÍODO
 # ============================================================
 
 periodos = (
+
     dados[
         ["periodo", "data"]
     ]
+
     .drop_duplicates()
-    .sort_values("data")["periodo"]
+
+    .sort_values("data")[
+        "periodo"
+    ]
+
     .tolist()
 )
 
+
 periodo_selecionado = st.sidebar.selectbox(
+
     "📅 Período",
+
     options=periodos,
+
     index=len(periodos) - 1
 )
 
 
 # ============================================================
-# 9. FILTRO DE UF
+# 10. FILTRO DE UF
 # ============================================================
 
 ufs = sorted(
-    dados["uf"]
+
+    dados[
+        "uf"
+    ]
+
     .dropna()
+
     .unique()
 )
 
-# Define São Paulo como UF padrão, caso esteja disponível.
-#
-# Isso evita que Acre apareça inicialmente em junho de 2026,
-# período no qual não existe valor de internações disponível
-# para cálculo do IPH.
 
+# São Paulo é utilizado como visualização inicial.
 indice_uf_padrao = (
+
     ufs.index("São Paulo")
+
     if "São Paulo" in ufs
+
     else 0
 )
 
+
 uf_selecionada = st.sidebar.selectbox(
+
     "📍 Unidade da Federação",
+
     options=ufs,
+
     index=indice_uf_padrao
 )
 
 
 # ============================================================
-# 10. INFORMAÇÕES METODOLÓGICAS NA SIDEBAR
+# 11. INFORMAÇÕES DO IPH NA SIDEBAR
 # ============================================================
 
 st.sidebar.divider()
@@ -524,7 +663,7 @@ st.sidebar.markdown(
     **Sobre o IPH**
 
     O Índice de Pressão Hospitalar varia de **0 a 100**
-    e compara a pressão relativa entre as UFs dentro
+    e representa a posição relativa das UFs dentro
     de cada período.
 
     🟢 **Baixa:** abaixo de 25  
@@ -542,48 +681,79 @@ st.sidebar.caption(
 
 
 # ============================================================
-# 11. FILTRAGEM DOS DADOS
+# 12. FILTRAGEM DA UF SELECIONADA
 # ============================================================
 
 dados_filtrados = dados[
+
     (dados["periodo"] == periodo_selecionado)
+
     &
+
     (dados["uf"] == uf_selecionada)
 ]
 
+
+# Obtém o registro correspondente.
 registro = dados_filtrados.iloc[0]
 
 
 # ============================================================
-# 12. PREPARAÇÃO DO RANKING
+# 13. PREPARAÇÃO DO RANKING DO PERÍODO
 # ============================================================
 
 ranking_periodo = dados[
-    dados["periodo"] == periodo_selecionado
+
+    dados["periodo"]
+    == periodo_selecionado
+
 ].copy()
 
+
+# Retira UFs sem IPH calculado.
 ranking_valido = ranking_periodo.dropna(
-    subset=["indice_pressao"]
+
+    subset=[
+        "indice_pressao"
+    ]
+
 ).copy()
 
+
+# Ordena do maior IPH para o menor.
 ranking_valido = ranking_valido.sort_values(
+
     "indice_pressao",
+
     ascending=False
+
 ).reset_index(drop=True)
 
-ranking_valido["posicao_dashboard"] = range(
+
+# Cria posição nacional.
+ranking_valido[
+    "posicao_dashboard"
+] = range(
+
     1,
+
     len(ranking_valido) + 1
 )
 
 
 # ============================================================
-# 13. POSIÇÃO DA UF SELECIONADA
+# 14. POSIÇÃO NACIONAL DA UF
 # ============================================================
 
 posicao_uf = ranking_valido[
-    ranking_valido["uf"] == uf_selecionada
-]["posicao_dashboard"]
+
+    ranking_valido[
+        "uf"
+    ] == uf_selecionada
+
+][
+    "posicao_dashboard"
+]
 
 
 if len(posicao_uf) > 0:
@@ -593,6 +763,7 @@ if len(posicao_uf) > 0:
     )
 
     valor_ranking = (
+
         f"{posicao_uf}º de "
         f"{len(ranking_valido)}"
     )
@@ -603,7 +774,7 @@ else:
 
 
 # ============================================================
-# 14. IDENTIFICAÇÃO DA ANÁLISE
+# 15. VISÃO GERAL
 # ============================================================
 
 renderizar_html(
@@ -633,7 +804,7 @@ renderizar_html(
 
 
 # ============================================================
-# 15. PREPARAÇÃO DOS KPIs
+# 16. PREPARAÇÃO DOS KPIs
 # ============================================================
 
 valor_internacoes = formatar_inteiro(
@@ -654,11 +825,16 @@ valor_indice = formatar_decimal(
     1
 )
 
-nivel_pressao = registro["nivel_pressao"]
 
-# Caso exista algum valor ausente inesperado.
+nivel_pressao = registro[
+    "nivel_pressao"
+]
+
+
 if pd.isna(nivel_pressao):
+
     nivel_pressao = "Sem dado"
+
 
 estilo_pressao = obter_estilo_pressao(
     nivel_pressao
@@ -666,7 +842,7 @@ estilo_pressao = obter_estilo_pressao(
 
 
 # ============================================================
-# 16. CARDS PRINCIPAIS
+# 17. CARDS PRINCIPAIS
 # ============================================================
 
 col1, col2, col3, col4, col5 = st.columns(
@@ -797,7 +973,7 @@ with col5:
 
 
 # ============================================================
-# 17. CONTEXTO DO PERÍODO
+# 18. CONTEXTO DA UF
 # ============================================================
 
 st.markdown(
@@ -808,10 +984,16 @@ st.markdown(
 contexto1, contexto2, contexto3 = st.columns(3)
 
 
+# ============================================================
+# VARIAÇÃO MENSAL
+# ============================================================
+
 with contexto1:
 
     if pd.notna(
-        registro["variacao_percentual"]
+        registro[
+            "variacao_percentual"
+        ]
     ):
 
         variacao = registro[
@@ -821,6 +1003,7 @@ with contexto1:
         sinal = "+" if variacao > 0 else ""
 
         valor_variacao = (
+
             f"{sinal}"
             f"{formatar_decimal(variacao, 2)}%"
         )
@@ -828,6 +1011,7 @@ with contexto1:
     else:
 
         valor_variacao = "Sem dado"
+
 
     renderizar_html(
         f"""
@@ -849,6 +1033,10 @@ with contexto1:
         """
     )
 
+
+# ============================================================
+# POSIÇÃO NACIONAL
+# ============================================================
 
 with contexto2:
 
@@ -872,6 +1060,10 @@ with contexto2:
         """
     )
 
+
+# ============================================================
+# COBERTURA DA ANÁLISE
+# ============================================================
 
 with contexto3:
 
@@ -901,7 +1093,7 @@ with contexto3:
 
 
 # ============================================================
-# 18. EVOLUÇÃO HISTÓRICA DAS INTERNAÇÕES
+# 19. EVOLUÇÃO DAS INTERNAÇÕES
 # ============================================================
 
 st.divider()
@@ -933,8 +1125,13 @@ renderizar_html(
 
 
 historico_uf = dados[
-    dados["uf"] == uf_selecionada
+
+    dados[
+        "uf"
+    ] == uf_selecionada
+
 ].copy()
+
 
 historico_uf = historico_uf.sort_values(
     "data"
@@ -942,25 +1139,34 @@ historico_uf = historico_uf.sort_values(
 
 
 grafico_internacoes = px.line(
+
     historico_uf,
+
     x="data",
+
     y="internacoes",
+
     markers=True,
 
     labels={
-        "data": "Período",
-        "internacoes": "Internações"
+
+        "data":
+            "Período",
+
+        "internacoes":
+            "Internações"
     }
 )
 
 
 grafico_internacoes.update_layout(
 
-    title_text="",
-
     template="plotly_white",
 
+    title_text="",
+
     xaxis_title="",
+
     yaxis_title="Internações",
 
     hovermode="x unified",
@@ -974,18 +1180,14 @@ grafico_internacoes.update_layout(
         b=25
     ),
 
-    showlegend=False,
-
-    font=dict(
-        family="Arial",
-        size=12
-    )
+    showlegend=False
 )
 
 
 grafico_internacoes.update_xaxes(
     showgrid=False
 )
+
 
 grafico_internacoes.update_yaxes(
     gridcolor="#EDF1F5",
@@ -994,7 +1196,9 @@ grafico_internacoes.update_yaxes(
 
 
 st.plotly_chart(
+
     grafico_internacoes,
+
     use_container_width=True,
 
     config={
@@ -1004,7 +1208,124 @@ st.plotly_chart(
 
 
 # ============================================================
-# 19. RANKING NACIONAL
+# 20. EVOLUÇÃO DO IPH
+# ============================================================
+
+st.divider()
+
+renderizar_html(
+    """
+    <div class="section-label">
+        EVOLUÇÃO DA PRESSÃO
+    </div>
+    """
+)
+
+renderizar_html(
+    f"""
+    <div class="section-title">
+        Evolução do IPH em {uf_selecionada}
+    </div>
+    """
+)
+
+renderizar_html(
+    """
+    <div class="section-description">
+        Histórico do Índice de Pressão Hospitalar
+        ao longo dos períodos disponíveis.
+    </div>
+    """
+)
+
+
+historico_iph = historico_uf.dropna(
+
+    subset=[
+        "indice_pressao"
+    ]
+
+).copy()
+
+
+grafico_iph = px.line(
+
+    historico_iph,
+
+    x="data",
+
+    y="indice_pressao",
+
+    markers=True,
+
+    labels={
+
+        "data":
+            "Período",
+
+        "indice_pressao":
+            "Índice de Pressão"
+    }
+)
+
+
+grafico_iph.update_layout(
+
+    template="plotly_white",
+
+    title_text="",
+
+    xaxis_title="",
+
+    yaxis_title="Índice de Pressão Hospitalar",
+
+    hovermode="x unified",
+
+    height=400,
+
+    margin=dict(
+        l=30,
+        r=30,
+        t=25,
+        b=25
+    ),
+
+    showlegend=False
+)
+
+
+grafico_iph.update_yaxes(
+
+    range=[
+        0,
+        100
+    ],
+
+    gridcolor="#EDF1F5",
+
+    zeroline=False
+)
+
+
+grafico_iph.update_xaxes(
+    showgrid=False
+)
+
+
+st.plotly_chart(
+
+    grafico_iph,
+
+    use_container_width=True,
+
+    config={
+        "displayModeBar": False
+    }
+)
+
+
+# ============================================================
+# 21. RANKING NACIONAL
 # ============================================================
 
 st.divider()
@@ -1036,15 +1357,8 @@ renderizar_html(
 
 
 # ============================================================
-# 20. AVISO DE INTERPRETAÇÃO DO RANKING
+# 22. AVISO DE INTERPRETAÇÃO
 # ============================================================
-
-# Este aviso é importante porque o IPH não mede qualidade geral
-# do sistema de saúde, vulnerabilidade socioeconômica ou toda
-# a estrutura hospitalar existente em cada estado.
-#
-# A análise utiliza internações registradas no SIH/SUS e
-# leitos SUS registrados no CNES.
 
 st.info(
     """
@@ -1053,12 +1367,12 @@ st.info(
     O CareVision analisa **internações registradas no SIH/SUS**
     e **leitos SUS registrados no CNES**.
 
-    Por isso, o Índice de Pressão Hospitalar representa a
-    **pressão relativa observada na rede analisada**, e não um
-    indicador geral de vulnerabilidade social, qualidade da saúde
-    ou da situação hospitalar completa de cada estado.
+    Dessa forma, o IPH representa a pressão relativa observada
+    na rede analisada e não um indicador geral de vulnerabilidade
+    social, qualidade da saúde ou da situação hospitalar completa
+    de cada estado.
 
-    Assim, estados com menor infraestrutura ou maior
+    Por isso, estados com menor infraestrutura ou maior
     vulnerabilidade não necessariamente aparecerão nas primeiras
     posições do ranking.
     """
@@ -1066,51 +1380,33 @@ st.info(
 
 
 # ============================================================
-# 21. TOP 10 NACIONAL
+# 23. TOP 10
 # ============================================================
 
 top_10 = (
+
     ranking_valido
+
     .head(10)
+
     .copy()
 )
 
 
-# Invertemos a ordem para que o maior valor fique no topo
-# do gráfico horizontal.
-
 top_10 = top_10.sort_values(
+
     "indice_pressao",
+
     ascending=True
 )
 
 
-# ============================================================
-# 22. CORES DAS CLASSIFICAÇÕES
-# ============================================================
-
-cores_pressao = {
-
-    "Baixa": "#2CA66F",
-
-    "Moderada": "#E5B52E",
-
-    "Alta": "#E98532",
-
-    "Crítica": "#D94A4A",
-
-    "Sem dado": "#9AA5B1"
-}
-
-
-# ============================================================
-# 23. GRÁFICO DO RANKING
-# ============================================================
-
 grafico_ranking = px.bar(
+
     top_10,
 
     x="indice_pressao",
+
     y="uf",
 
     orientation="h",
@@ -1120,11 +1416,21 @@ grafico_ranking = px.bar(
     color_discrete_map=cores_pressao,
 
     hover_data={
-        "internacoes": ":,.0f",
-        "leitos_sus": ":,.0f",
-        "internacoes_por_leito": ":.2f",
-        "variacao_percentual": ":.2f",
-        "indice_pressao": ":.1f"
+
+        "internacoes":
+            ":,.0f",
+
+        "leitos_sus":
+            ":,.0f",
+
+        "internacoes_por_leito":
+            ":.2f",
+
+        "variacao_percentual":
+            ":.2f",
+
+        "indice_pressao":
+            ":.1f"
     },
 
     labels={
@@ -1155,9 +1461,9 @@ grafico_ranking = px.bar(
 
 grafico_ranking.update_layout(
 
-    title_text="",
-
     template="plotly_white",
+
+    title_text="",
 
     xaxis_title="Índice de Pressão Hospitalar",
 
@@ -1166,10 +1472,15 @@ grafico_ranking.update_layout(
     legend_title_text="Nível de pressão",
 
     legend=dict(
+
         orientation="h",
+
         yanchor="bottom",
+
         y=1.02,
+
         xanchor="right",
+
         x=1
     ),
 
@@ -1180,20 +1491,22 @@ grafico_ranking.update_layout(
         r=30,
         t=50,
         b=30
-    ),
-
-    font=dict(
-        family="Arial",
-        size=12
     )
 )
 
 
 grafico_ranking.update_xaxes(
-    range=[0, 100],
+
+    range=[
+        0,
+        100
+    ],
+
     gridcolor="#EDF1F5",
+
     zeroline=False
 )
+
 
 grafico_ranking.update_yaxes(
     showgrid=False
@@ -1201,7 +1514,9 @@ grafico_ranking.update_yaxes(
 
 
 st.plotly_chart(
+
     grafico_ranking,
+
     use_container_width=True,
 
     config={
@@ -1211,7 +1526,845 @@ st.plotly_chart(
 
 
 # ============================================================
-# 24. TABELA ANALÍTICA NACIONAL
+# 24. EXPLICABILIDADE DO IPH
+# ============================================================
+
+st.divider()
+
+renderizar_html(
+    """
+    <div class="section-label">
+        EXPLICABILIDADE DO MODELO
+    </div>
+    """
+)
+
+renderizar_html(
+    f"""
+    <div class="section-title">
+        O que influencia o IPH de {uf_selecionada}?
+    </div>
+    """
+)
+
+renderizar_html(
+    """
+    <div class="section-description">
+        Componentes utilizados na construção do
+        Índice de Pressão Hospitalar.
+    </div>
+    """
+)
+
+
+# ============================================================
+# 25. IDENTIFICAÇÃO DOS COMPONENTES DO IPH
+# ============================================================
+
+# Dependendo da versão utilizada na geração do CSV,
+# os nomes dos scores intermediários podem variar.
+#
+# O código abaixo procura algumas nomenclaturas possíveis.
+
+coluna_score_capacidade = None
+coluna_score_populacao = None
+coluna_score_tendencia = None
+
+
+possiveis_capacidade = [
+
+    "score_demanda_capacidade",
+
+    "score_internacoes_por_leito",
+
+    "score_capacidade"
+]
+
+
+possiveis_populacao = [
+
+    "score_demanda_populacao",
+
+    "score_internacoes_100mil",
+
+    "score_populacao"
+]
+
+
+possiveis_tendencia = [
+
+    "score_tendencia",
+
+    "score_variacao",
+
+    "score_variacao_percentual"
+]
+
+
+for coluna in possiveis_capacidade:
+
+    if coluna in dados.columns:
+
+        coluna_score_capacidade = coluna
+
+        break
+
+
+for coluna in possiveis_populacao:
+
+    if coluna in dados.columns:
+
+        coluna_score_populacao = coluna
+
+        break
+
+
+for coluna in possiveis_tendencia:
+
+    if coluna in dados.columns:
+
+        coluna_score_tendencia = coluna
+
+        break
+
+
+# ============================================================
+# 26. GRÁFICO DOS COMPONENTES
+# ============================================================
+
+if (
+    coluna_score_capacidade is not None
+    and coluna_score_populacao is not None
+    and coluna_score_tendencia is not None
+):
+
+    valor_capacidade = registro[
+        coluna_score_capacidade
+    ]
+
+    valor_populacao = registro[
+        coluna_score_populacao
+    ]
+
+    valor_tendencia = registro[
+        coluna_score_tendencia
+    ]
+
+
+    # Caso os scores estejam na escala de 0 a 1,
+    # convertemos para 0 a 100 apenas para visualização.
+    valores_scores = [
+
+        valor_capacidade,
+
+        valor_populacao,
+
+        valor_tendencia
+    ]
+
+
+    if max(
+        [
+            valor
+            for valor in valores_scores
+            if pd.notna(valor)
+        ],
+        default=0
+    ) <= 1:
+
+        valores_scores = [
+
+            valor * 100
+            if pd.notna(valor)
+            else valor
+
+            for valor in valores_scores
+        ]
+
+
+    dados_componentes = pd.DataFrame(
+        {
+
+            "Componente": [
+
+                "Demanda / capacidade",
+
+                "Demanda / população",
+
+                "Tendência recente"
+            ],
+
+            "Score": valores_scores,
+
+            "Peso": [
+
+                "50%",
+
+                "30%",
+
+                "20%"
+            ]
+        }
+    )
+
+
+    grafico_componentes = px.bar(
+
+        dados_componentes,
+
+        x="Componente",
+
+        y="Score",
+
+        text="Peso",
+
+        labels={
+
+            "Score":
+                "Score relativo",
+
+            "Componente":
+                ""
+        }
+    )
+
+
+    grafico_componentes.update_traces(
+
+        texttemplate="Peso: %{text}",
+
+        textposition="outside"
+    )
+
+
+    grafico_componentes.update_layout(
+
+        template="plotly_white",
+
+        title_text="",
+
+        yaxis_title="Score relativo",
+
+        xaxis_title="",
+
+        height=410,
+
+        margin=dict(
+            l=30,
+            r=30,
+            t=45,
+            b=30
+        ),
+
+        showlegend=False
+    )
+
+
+    grafico_componentes.update_yaxes(
+
+        range=[
+            0,
+            110
+        ],
+
+        gridcolor="#EDF1F5",
+
+        zeroline=False
+    )
+
+
+    st.plotly_chart(
+
+        grafico_componentes,
+
+        use_container_width=True,
+
+        config={
+            "displayModeBar": False
+        }
+    )
+
+
+    st.caption(
+        "Os componentes mostram a posição relativa da UF "
+        "em cada dimensão utilizada pelo índice. Os pesos "
+        "de 50%, 30% e 20% representam a participação de "
+        "cada dimensão no cálculo do IPH."
+    )
+
+
+else:
+
+    st.info(
+        """
+        Os componentes intermediários utilizados no cálculo
+        do IPH não estão disponíveis nesta versão da base
+        carregada pelo dashboard.
+
+        O IPH continua sendo calculado com 50% de
+        demanda/capacidade, 30% de demanda/população e
+        20% de tendência recente.
+        """
+    )
+
+
+# ============================================================
+# 27. DEMANDA × CAPACIDADE
+# ============================================================
+
+st.divider()
+
+renderizar_html(
+    """
+    <div class="section-label">
+        DEMANDA E CAPACIDADE
+    </div>
+    """
+)
+
+renderizar_html(
+    """
+    <div class="section-title">
+        Demanda hospitalar × disponibilidade de leitos
+    </div>
+    """
+)
+
+renderizar_html(
+    f"""
+    <div class="section-description">
+        Comparação entre as UFs em {periodo_selecionado}
+        considerando indicadores normalizados pela população.
+    </div>
+    """
+)
+
+
+dados_dispersao = ranking_periodo.dropna(
+
+    subset=[
+
+        "internacoes_100mil",
+
+        "leitos_100mil",
+
+        "indice_pressao"
+    ]
+
+).copy()
+
+
+grafico_dispersao = px.scatter(
+
+    dados_dispersao,
+
+    x="leitos_100mil",
+
+    y="internacoes_100mil",
+
+    size="indice_pressao",
+
+    color="nivel_pressao",
+
+    hover_name="uf",
+
+    color_discrete_map=cores_pressao,
+
+    size_max=35,
+
+    labels={
+
+        "leitos_100mil":
+            "Leitos SUS por 100 mil habitantes",
+
+        "internacoes_100mil":
+            "Internações por 100 mil habitantes",
+
+        "indice_pressao":
+            "IPH",
+
+        "nivel_pressao":
+            "Nível"
+    }
+)
+
+
+grafico_dispersao.update_layout(
+
+    template="plotly_white",
+
+    title_text="",
+
+    height=500,
+
+    xaxis_title=
+        "Leitos SUS por 100 mil habitantes",
+
+    yaxis_title=
+        "Internações por 100 mil habitantes",
+
+    legend_title_text=
+        "Nível de pressão",
+
+    margin=dict(
+        l=30,
+        r=30,
+        t=30,
+        b=30
+    )
+)
+
+
+grafico_dispersao.update_xaxes(
+
+    gridcolor="#EDF1F5",
+
+    zeroline=False
+)
+
+
+grafico_dispersao.update_yaxes(
+
+    gridcolor="#EDF1F5",
+
+    zeroline=False
+)
+
+
+st.plotly_chart(
+
+    grafico_dispersao,
+
+    use_container_width=True,
+
+    config={
+        "displayModeBar": False
+    }
+)
+
+
+st.caption(
+    "Cada ponto representa uma UF. O eixo horizontal mostra "
+    "a disponibilidade relativa de leitos SUS e o eixo vertical "
+    "mostra as internações por 100 mil habitantes. O tamanho "
+    "dos pontos representa o IPH."
+)
+
+
+# ============================================================
+# 28. DISTRIBUIÇÃO DAS CLASSIFICAÇÕES
+# ============================================================
+
+st.divider()
+
+renderizar_html(
+    """
+    <div class="section-label">
+        PANORAMA NACIONAL
+    </div>
+    """
+)
+
+renderizar_html(
+    f"""
+    <div class="section-title">
+        Distribuição dos níveis de pressão • {periodo_selecionado}
+    </div>
+    """
+)
+
+renderizar_html(
+    """
+    <div class="section-description">
+        Quantidade de UFs em cada faixa do
+        Índice de Pressão Hospitalar.
+    </div>
+    """
+)
+
+
+distribuicao_pressao = (
+
+    ranking_periodo[
+        "nivel_pressao"
+    ]
+
+    .fillna("Sem dado")
+
+    .value_counts()
+
+    .reindex(
+        [
+
+            "Baixa",
+
+            "Moderada",
+
+            "Alta",
+
+            "Crítica",
+
+            "Sem dado"
+        ],
+
+        fill_value=0
+    )
+
+    .reset_index()
+)
+
+
+distribuicao_pressao.columns = [
+
+    "Nível",
+
+    "Quantidade"
+]
+
+
+grafico_distribuicao = px.bar(
+
+    distribuicao_pressao,
+
+    x="Nível",
+
+    y="Quantidade",
+
+    color="Nível",
+
+    color_discrete_map=cores_pressao,
+
+    text="Quantidade"
+)
+
+
+grafico_distribuicao.update_traces(
+    textposition="outside"
+)
+
+
+grafico_distribuicao.update_layout(
+
+    template="plotly_white",
+
+    title_text="",
+
+    height=400,
+
+    xaxis_title="",
+
+    yaxis_title="Quantidade de UFs",
+
+    showlegend=False,
+
+    margin=dict(
+        l=30,
+        r=30,
+        t=30,
+        b=30
+    )
+)
+
+
+grafico_distribuicao.update_xaxes(
+    showgrid=False
+)
+
+
+grafico_distribuicao.update_yaxes(
+
+    gridcolor="#EDF1F5",
+
+    zeroline=False
+)
+
+
+st.plotly_chart(
+
+    grafico_distribuicao,
+
+    use_container_width=True,
+
+    config={
+        "displayModeBar": False
+    }
+)
+
+
+# ============================================================
+# 29. TENDÊNCIA RECENTE
+# ============================================================
+
+st.divider()
+
+renderizar_html(
+    """
+    <div class="section-label">
+        TENDÊNCIA RECENTE
+    </div>
+    """
+)
+
+renderizar_html(
+    f"""
+    <div class="section-title">
+        Maiores mudanças nas internações • {periodo_selecionado}
+    </div>
+    """
+)
+
+renderizar_html(
+    """
+    <div class="section-description">
+        UFs com maiores aumentos e reduções percentuais
+        de internações em relação ao mês anterior.
+    </div>
+    """
+)
+
+
+variacoes_validas = ranking_periodo.dropna(
+
+    subset=[
+        "variacao_percentual"
+    ]
+
+).copy()
+
+
+# ============================================================
+# TOP 5 AUMENTOS
+# ============================================================
+
+maiores_aumentos = (
+
+    variacoes_validas
+
+    .sort_values(
+        "variacao_percentual",
+        ascending=False
+    )
+
+    .head(5)
+
+    .sort_values(
+        "variacao_percentual",
+        ascending=True
+    )
+)
+
+
+# ============================================================
+# TOP 5 REDUÇÕES
+# ============================================================
+
+maiores_quedas = (
+
+    variacoes_validas
+
+    .sort_values(
+        "variacao_percentual",
+        ascending=True
+    )
+
+    .head(5)
+
+    .sort_values(
+        "variacao_percentual",
+        ascending=False
+    )
+)
+
+
+col_aumento, col_queda = st.columns(2)
+
+
+# ============================================================
+# GRÁFICO DE AUMENTOS
+# ============================================================
+
+with col_aumento:
+
+    st.markdown(
+        "#### 📈 Maiores aumentos"
+    )
+
+    grafico_aumentos = px.bar(
+
+        maiores_aumentos,
+
+        x="variacao_percentual",
+
+        y="uf",
+
+        orientation="h",
+
+        text="variacao_percentual",
+
+        labels={
+
+            "variacao_percentual":
+                "Variação (%)",
+
+            "uf":
+                ""
+        }
+    )
+
+
+    grafico_aumentos.update_traces(
+
+        texttemplate=
+            "%{text:.1f}%",
+
+        textposition=
+            "outside"
+    )
+
+
+    grafico_aumentos.update_layout(
+
+        template="plotly_white",
+
+        title_text="",
+
+        xaxis_title=
+            "Variação mensal (%)",
+
+        yaxis_title="",
+
+        height=350,
+
+        showlegend=False,
+
+        margin=dict(
+            l=20,
+            r=50,
+            t=10,
+            b=20
+        )
+    )
+
+
+    grafico_aumentos.update_xaxes(
+
+        gridcolor="#EDF1F5",
+
+        zeroline=False
+    )
+
+
+    grafico_aumentos.update_yaxes(
+        showgrid=False
+    )
+
+
+    st.plotly_chart(
+
+        grafico_aumentos,
+
+        use_container_width=True,
+
+        config={
+            "displayModeBar": False
+        }
+    )
+
+
+# ============================================================
+# GRÁFICO DE REDUÇÕES
+# ============================================================
+
+with col_queda:
+
+    st.markdown(
+        "#### 📉 Maiores reduções"
+    )
+
+    grafico_quedas = px.bar(
+
+        maiores_quedas,
+
+        x="variacao_percentual",
+
+        y="uf",
+
+        orientation="h",
+
+        text="variacao_percentual",
+
+        labels={
+
+            "variacao_percentual":
+                "Variação (%)",
+
+            "uf":
+                ""
+        }
+    )
+
+
+    grafico_quedas.update_traces(
+
+        texttemplate=
+            "%{text:.1f}%",
+
+        textposition=
+            "outside"
+    )
+
+
+    grafico_quedas.update_layout(
+
+        template="plotly_white",
+
+        title_text="",
+
+        xaxis_title=
+            "Variação mensal (%)",
+
+        yaxis_title="",
+
+        height=350,
+
+        showlegend=False,
+
+        margin=dict(
+            l=20,
+            r=50,
+            t=10,
+            b=20
+        )
+    )
+
+
+    grafico_quedas.update_xaxes(
+
+        gridcolor="#EDF1F5",
+
+        zeroline=False
+    )
+
+
+    grafico_quedas.update_yaxes(
+        showgrid=False
+    )
+
+
+    st.plotly_chart(
+
+        grafico_quedas,
+
+        use_container_width=True,
+
+        config={
+            "displayModeBar": False
+        }
+    )
+
+
+# ============================================================
+# 30. TABELA ANALÍTICA NACIONAL
 # ============================================================
 
 st.divider()
@@ -1243,28 +2396,49 @@ renderizar_html(
 
 
 tabela_nacional = dados[
-    dados["periodo"] == periodo_selecionado
+
+    dados[
+        "periodo"
+    ] == periodo_selecionado
+
 ][
+
     [
+
         "uf",
+
         "internacoes",
+
         "leitos_sus",
+
+        "internacoes_100mil",
+
+        "leitos_100mil",
+
         "internacoes_por_leito",
+
         "variacao_percentual",
+
         "indice_pressao",
+
         "nivel_pressao"
     ]
+
 ].copy()
 
 
 tabela_nacional = tabela_nacional.sort_values(
+
     "indice_pressao",
+
     ascending=False,
+
     na_position="last"
 )
 
 
 tabela_nacional = tabela_nacional.rename(
+
     columns={
 
         "uf":
@@ -1275,6 +2449,12 @@ tabela_nacional = tabela_nacional.rename(
 
         "leitos_sus":
             "Leitos SUS",
+
+        "internacoes_100mil":
+            "Internações / 100 mil",
+
+        "leitos_100mil":
+            "Leitos SUS / 100 mil",
 
         "internacoes_por_leito":
             "Internações / leito",
@@ -1292,50 +2472,90 @@ tabela_nacional = tabela_nacional.rename(
 
 
 st.dataframe(
+
     tabela_nacional,
 
     use_container_width=True,
 
     hide_index=True,
 
-    height=480,
+    height=500,
 
     column_config={
 
         "Internações":
+
             st.column_config.NumberColumn(
+
                 "Internações",
+
                 format="%.0f"
             ),
+
 
         "Leitos SUS":
+
             st.column_config.NumberColumn(
+
                 "Leitos SUS",
+
                 format="%.0f"
             ),
 
-        "Internações / leito":
+
+        "Internações / 100 mil":
+
             st.column_config.NumberColumn(
-                "Internações / leito",
+
+                "Internações / 100 mil",
+
                 format="%.2f"
             ),
+
+
+        "Leitos SUS / 100 mil":
+
+            st.column_config.NumberColumn(
+
+                "Leitos SUS / 100 mil",
+
+                format="%.2f"
+            ),
+
+
+        "Internações / leito":
+
+            st.column_config.NumberColumn(
+
+                "Internações / leito",
+
+                format="%.2f"
+            ),
+
 
         "Variação mensal (%)":
+
             st.column_config.NumberColumn(
+
                 "Variação mensal (%)",
+
                 format="%.2f"
             ),
 
+
         "Índice de Pressão":
+
             st.column_config.ProgressColumn(
+
                 "Índice de Pressão",
 
                 help=(
-                    "Índice experimental do CareVision "
-                    "em escala de 0 a 100."
+                    "Índice experimental do "
+                    "CareVision em escala de 0 a 100."
                 ),
 
                 min_value=0,
+
                 max_value=100,
 
                 format="%.1f"
@@ -1345,10 +2565,42 @@ st.dataframe(
 
 
 # ============================================================
-# 25. METODOLOGIA E LIMITAÇÕES
+# 31. DOWNLOAD DA TABELA
+# ============================================================
+
+# Transformamos a tabela do período selecionado em CSV
+# para permitir que o usuário baixe os resultados.
+
+csv_download = tabela_nacional.to_csv(
+
+    index=False,
+
+    encoding="utf-8-sig"
+)
+
+
+st.download_button(
+
+    label=
+        "⬇️ Baixar dados do período",
+
+    data=
+        csv_download,
+
+    file_name=
+        f"carevision_{periodo_selecionado.replace('/', '_')}.csv",
+
+    mime=
+        "text/csv"
+)
+
+
+# ============================================================
+# 32. METODOLOGIA E LIMITAÇÕES
 # ============================================================
 
 st.divider()
+
 
 with st.expander(
     "ℹ️ Metodologia e limitações do CareVision"
@@ -1363,65 +2615,88 @@ with st.expander(
 
         Ele combina três componentes:
 
-        - **50% — demanda em relação à capacidade:** baseada
-          na relação entre internações e leitos SUS;
+        **50% — demanda em relação à capacidade**
 
-        - **30% — demanda em relação à população:** baseada
-          no número de internações por 100 mil habitantes;
+        Relação entre internações hospitalares registradas
+        e leitos SUS disponíveis.
 
-        - **20% — tendência recente:** baseada na variação
-          percentual das internações em relação ao mês anterior.
+        **30% — demanda em relação à população**
+
+        Internações hospitalares registradas por
+        100 mil habitantes.
+
+        **20% — tendência recente**
+
+        Variação percentual das internações em relação
+        ao mês anterior.
 
         Os componentes são comparados entre as UFs dentro
         de cada período e combinados em uma escala de
         **0 a 100**.
 
+        ---
+
         ### Classificação
 
-        - **Baixa:** IPH abaixo de 25;
-        - **Moderada:** IPH de 25 até abaixo de 50;
-        - **Alta:** IPH de 50 até abaixo de 75;
-        - **Crítica:** IPH de 75 a 100.
+        🟢 **Baixa:** abaixo de 25
 
-        ### Interpretação dos dados
+        🟡 **Moderada:** 25 a abaixo de 50
 
-        O CareVision utiliza **internações registradas no
-        SIH/SUS** e **leitos SUS registrados no CNES**.
+        🟠 **Alta:** 50 a abaixo de 75
 
-        Portanto, o ranking não representa toda a estrutura
-        hospitalar existente no território brasileiro.
+        🔴 **Crítica:** 75 a 100
 
-        Um estado com maior vulnerabilidade social, menor
-        disponibilidade geral de serviços ou outras dificuldades
-        assistenciais não necessariamente apresentará o maior IPH.
+        ---
+
+        ### Interpretação dos resultados
+
+        O CareVision utiliza internações registradas no
+        **SIH/SUS** e leitos SUS registrados no **CNES**.
+
+        Portanto, o IPH representa a pressão relativa observada
+        na rede analisada e não deve ser interpretado como um
+        indicador geral de qualidade da saúde, vulnerabilidade
+        social ou situação hospitalar completa de um estado.
+
+        Estados com menor infraestrutura hospitalar ou maior
+        vulnerabilidade social não necessariamente apresentarão
+        maior IPH.
+
+        ---
 
         ### Limitações
 
         A relação **internações por leito** é utilizada como
-        proxy de carga hospitalar e **não representa taxa
-        de ocupação hospitalar**.
+        uma proxy de carga hospitalar.
 
-        Para calcular uma taxa real de ocupação seriam
-        necessários dados operacionais adicionais, como
-        leitos-dia disponíveis e pacientes-dia.
+        Ela **não representa a taxa real de ocupação hospitalar**.
 
-        Os dados de internações utilizados são provenientes
-        do **SIH/SUS** e representam internações registradas
-        e financiadas pelo Sistema Único de Saúde.
+        Para calcular ocupação seriam necessários dados
+        adicionais como pacientes-dia e leitos-dia disponíveis.
+
+        As internações utilizadas são provenientes do
+        **SIH/SUS** e representam registros vinculados ao
+        Sistema Único de Saúde.
 
         Os dados de leitos são provenientes do **CNES**.
 
         A população utilizada corresponde às estimativas
         populacionais do **IBGE**.
 
-        O IPH não é um indicador oficial do Ministério da Saúde,
-        DATASUS, CNES ou IBGE e não possui finalidade clínica.
+        A estimativa populacional de 2025 também foi utilizada
+        nos meses de 2026 como simplificação metodológica do MVP.
+
+        O IPH é um indicador desenvolvido especificamente para
+        o CareVision e **não corresponde a um índice oficial**
+        do Ministério da Saúde, DATASUS, CNES ou IBGE.
+
+        O índice também não possui finalidade clínica.
         """
     )
 
 
 # ============================================================
-# 26. RODAPÉ
+# 33. RODAPÉ
 # ============================================================
 
 renderizar_html(
