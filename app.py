@@ -37,10 +37,6 @@ from textwrap import dedent
 # 2. CONFIGURAÇÃO DA PÁGINA
 # ============================================================
 
-# layout="wide":
-# utiliza melhor o espaço horizontal da tela,
-# característica importante para dashboards analíticos.
-
 st.set_page_config(
     page_title="CareVision | Pressão Hospitalar",
     page_icon="🏥",
@@ -52,11 +48,6 @@ st.set_page_config(
 # ============================================================
 # 3. IDENTIDADE VISUAL / CSS
 # ============================================================
-
-# O Streamlit possui uma aparência padrão bastante simples.
-#
-# O CSS abaixo cria uma identidade visual própria para o
-# CareVision, mantendo uma aparência limpa e profissional.
 
 st.markdown(
     dedent(
@@ -174,7 +165,6 @@ st.markdown(
             background-color: #FFFFFF;
             border: 1px solid #E7ECF1;
             border-radius: 15px;
-
             padding: 19px 20px;
             min-height: 126px;
 
@@ -245,7 +235,6 @@ st.markdown(
             background-color: #FFFFFF;
             border: 1px solid #E7ECF1;
             border-radius: 14px;
-
             padding: 16px 18px;
 
             box-shadow:
@@ -275,7 +264,7 @@ st.markdown(
 
 
         /* ===================================================
-           CONTAINERS E GRÁFICOS
+           GRÁFICOS
            =================================================== */
 
         [data-testid="stPlotlyChart"] {
@@ -290,7 +279,7 @@ st.markdown(
 
 
         /* ===================================================
-           DATAFRAME
+           TABELA
            =================================================== */
 
         [data-testid="stDataFrame"] {
@@ -337,20 +326,12 @@ st.markdown(
 # 4. CARREGAMENTO DA BASE ANALÍTICA
 # ============================================================
 
-# No Streamlit Cloud, o arquivo CSV encontra-se na raiz
-# do repositório junto com o app.py.
-
 dados = pd.read_csv(
     "carevision_base_final.csv",
     encoding="utf-8-sig"
 )
 
 # Converte a coluna de data para datetime.
-#
-# errors="coerce":
-# valores inválidos são transformados em NaT,
-# evitando falhas durante a execução.
-
 dados["data"] = pd.to_datetime(
     dados["data"],
     errors="coerce"
@@ -434,16 +415,10 @@ def renderizar_html(conteudo):
     """
     Renderiza os componentes HTML personalizados
     utilizados na interface do CareVision.
-
-    O st.html() interpreta diretamente o conteúdo
-    como HTML e evita que tags como <div> ou <p>
-    apareçam como texto no dashboard.
     """
 
-    # Remove a indentação criada pelas strings multilinha.
     conteudo_limpo = dedent(conteudo)
 
-    # Renderiza diretamente como HTML.
     st.html(conteudo_limpo)
 
 
@@ -489,12 +464,9 @@ st.sidebar.markdown(
 st.sidebar.divider()
 
 
-# ------------------------------------------------------------
-# FILTRO DE PERÍODO
-# ------------------------------------------------------------
-
-# Criamos uma lista cronologicamente ordenada
-# com todos os períodos disponíveis.
+# ============================================================
+# 8. FILTRO DE PERÍODO
+# ============================================================
 
 periodos = (
     dados[
@@ -505,8 +477,6 @@ periodos = (
     .tolist()
 )
 
-# O período mais recente aparece selecionado por padrão.
-
 periodo_selecionado = st.sidebar.selectbox(
     "📅 Período",
     options=periodos,
@@ -514,11 +484,9 @@ periodo_selecionado = st.sidebar.selectbox(
 )
 
 
-# ------------------------------------------------------------
-# FILTRO DE UF
-# ------------------------------------------------------------
-
-# Lista as Unidades da Federação em ordem alfabética.
+# ============================================================
+# 9. FILTRO DE UF
+# ============================================================
 
 ufs = sorted(
     dados["uf"]
@@ -526,15 +494,28 @@ ufs = sorted(
     .unique()
 )
 
+# Define São Paulo como UF padrão, caso esteja disponível.
+#
+# Isso evita que Acre apareça inicialmente em junho de 2026,
+# período no qual não existe valor de internações disponível
+# para cálculo do IPH.
+
+indice_uf_padrao = (
+    ufs.index("São Paulo")
+    if "São Paulo" in ufs
+    else 0
+)
+
 uf_selecionada = st.sidebar.selectbox(
     "📍 Unidade da Federação",
-    options=ufs
+    options=ufs,
+    index=indice_uf_padrao
 )
 
 
-# ------------------------------------------------------------
-# INFORMAÇÃO SOBRE O IPH
-# ------------------------------------------------------------
+# ============================================================
+# 10. INFORMAÇÕES METODOLÓGICAS NA SIDEBAR
+# ============================================================
 
 st.sidebar.divider()
 
@@ -561,10 +542,8 @@ st.sidebar.caption(
 
 
 # ============================================================
-# 8. FILTRAGEM DOS DADOS
+# 11. FILTRAGEM DOS DADOS
 # ============================================================
-
-# Selecionamos a combinação escolhida pelo usuário.
 
 dados_filtrados = dados[
     (dados["periodo"] == periodo_selecionado)
@@ -572,42 +551,25 @@ dados_filtrados = dados[
     (dados["uf"] == uf_selecionada)
 ]
 
-
-# Existe apenas um registro para cada combinação
-# UF + período.
-
 registro = dados_filtrados.iloc[0]
 
 
 # ============================================================
-# 9. PREPARAÇÃO DO RANKING DO PERÍODO
+# 12. PREPARAÇÃO DO RANKING
 # ============================================================
-
-# Selecionamos todas as UFs disponíveis no mesmo período
-# para construir o contexto nacional.
 
 ranking_periodo = dados[
     dados["periodo"] == periodo_selecionado
 ].copy()
 
-
-# Registros sem IPH não entram no ranking.
-
 ranking_valido = ranking_periodo.dropna(
     subset=["indice_pressao"]
 ).copy()
-
-
-# Ordenamos do maior para o menor IPH.
 
 ranking_valido = ranking_valido.sort_values(
     "indice_pressao",
     ascending=False
 ).reset_index(drop=True)
-
-
-# Criamos uma posição sequencial exclusivamente
-# para apresentação no dashboard.
 
 ranking_valido["posicao_dashboard"] = range(
     1,
@@ -616,7 +578,7 @@ ranking_valido["posicao_dashboard"] = range(
 
 
 # ============================================================
-# 10. POSIÇÃO DA UF SELECIONADA
+# 13. POSIÇÃO DA UF SELECIONADA
 # ============================================================
 
 posicao_uf = ranking_valido[
@@ -641,7 +603,7 @@ else:
 
 
 # ============================================================
-# 11. IDENTIFICAÇÃO DA ANÁLISE
+# 14. IDENTIFICAÇÃO DA ANÁLISE
 # ============================================================
 
 renderizar_html(
@@ -671,7 +633,7 @@ renderizar_html(
 
 
 # ============================================================
-# 12. PREPARAÇÃO DOS VALORES DOS KPIs
+# 15. PREPARAÇÃO DOS KPIs
 # ============================================================
 
 valor_internacoes = formatar_inteiro(
@@ -694,26 +656,23 @@ valor_indice = formatar_decimal(
 
 nivel_pressao = registro["nivel_pressao"]
 
+# Caso exista algum valor ausente inesperado.
+if pd.isna(nivel_pressao):
+    nivel_pressao = "Sem dado"
+
 estilo_pressao = obter_estilo_pressao(
     nivel_pressao
 )
 
 
 # ============================================================
-# 13. CARDS PRINCIPAIS
+# 16. CARDS PRINCIPAIS
 # ============================================================
-
-# Criamos quatro cards numéricos e um card
-# específico para o nível de pressão.
 
 col1, col2, col3, col4, col5 = st.columns(
     [1, 1, 1, 1, 1.15]
 )
 
-
-# ------------------------------------------------------------
-# CARD 1 - INTERNAÇÕES
-# ------------------------------------------------------------
 
 with col1:
 
@@ -738,10 +697,6 @@ with col1:
     )
 
 
-# ------------------------------------------------------------
-# CARD 2 - LEITOS SUS
-# ------------------------------------------------------------
-
 with col2:
 
     renderizar_html(
@@ -764,10 +719,6 @@ with col2:
         """
     )
 
-
-# ------------------------------------------------------------
-# CARD 3 - INTERNAÇÕES POR LEITO
-# ------------------------------------------------------------
 
 with col3:
 
@@ -792,10 +743,6 @@ with col3:
     )
 
 
-# ------------------------------------------------------------
-# CARD 4 - ÍNDICE DE PRESSÃO
-# ------------------------------------------------------------
-
 with col4:
 
     renderizar_html(
@@ -818,10 +765,6 @@ with col4:
         """
     )
 
-
-# ------------------------------------------------------------
-# CARD 5 - NÍVEL DE PRESSÃO
-# ------------------------------------------------------------
 
 with col5:
 
@@ -854,7 +797,7 @@ with col5:
 
 
 # ============================================================
-# 14. CONTEXTO DO PERÍODO
+# 17. CONTEXTO DO PERÍODO
 # ============================================================
 
 st.markdown(
@@ -864,10 +807,6 @@ st.markdown(
 
 contexto1, contexto2, contexto3 = st.columns(3)
 
-
-# ------------------------------------------------------------
-# VARIAÇÃO MENSAL
-# ------------------------------------------------------------
 
 with contexto1:
 
@@ -911,10 +850,6 @@ with contexto1:
     )
 
 
-# ------------------------------------------------------------
-# POSIÇÃO NACIONAL
-# ------------------------------------------------------------
-
 with contexto2:
 
     renderizar_html(
@@ -937,10 +872,6 @@ with contexto2:
         """
     )
 
-
-# ------------------------------------------------------------
-# COBERTURA DO IPH
-# ------------------------------------------------------------
 
 with contexto3:
 
@@ -970,7 +901,7 @@ with contexto3:
 
 
 # ============================================================
-# 15. EVOLUÇÃO HISTÓRICA DAS INTERNAÇÕES
+# 18. EVOLUÇÃO HISTÓRICA DAS INTERNAÇÕES
 # ============================================================
 
 st.divider()
@@ -1001,23 +932,14 @@ renderizar_html(
 )
 
 
-# Selecionamos todo o histórico da UF escolhida.
-
 historico_uf = dados[
     dados["uf"] == uf_selecionada
 ].copy()
-
-
-# Organizamos os dados em ordem cronológica.
 
 historico_uf = historico_uf.sort_values(
     "data"
 )
 
-
-# ------------------------------------------------------------
-# CRIAÇÃO DO GRÁFICO HISTÓRICO
-# ------------------------------------------------------------
 
 grafico_internacoes = px.line(
     historico_uf,
@@ -1032,29 +954,19 @@ grafico_internacoes = px.line(
 )
 
 
-# ------------------------------------------------------------
-# CONFIGURAÇÃO VISUAL DO GRÁFICO
-# ------------------------------------------------------------
-
 grafico_internacoes.update_layout(
 
-    # O título já é apresentado pelo Streamlit.
     title_text="",
 
-    # Utiliza fundo branco e aparência limpa.
     template="plotly_white",
 
-    # Nomes dos eixos.
     xaxis_title="",
     yaxis_title="Internações",
 
-    # Agrupa as informações do hover por período.
     hovermode="x unified",
 
-    # Altura do gráfico.
     height=410,
 
-    # Margens internas.
     margin=dict(
         l=30,
         r=30,
@@ -1062,7 +974,6 @@ grafico_internacoes.update_layout(
         b=25
     ),
 
-    # O gráfico possui apenas uma série.
     showlegend=False,
 
     font=dict(
@@ -1072,24 +983,15 @@ grafico_internacoes.update_layout(
 )
 
 
-# Remove a grade vertical.
-
 grafico_internacoes.update_xaxes(
     showgrid=False
 )
-
-
-# Mantém apenas uma grade horizontal discreta.
 
 grafico_internacoes.update_yaxes(
     gridcolor="#EDF1F5",
     zeroline=False
 )
 
-
-# ------------------------------------------------------------
-# EXIBIÇÃO DO GRÁFICO
-# ------------------------------------------------------------
 
 st.plotly_chart(
     grafico_internacoes,
@@ -1102,7 +1004,7 @@ st.plotly_chart(
 
 
 # ============================================================
-# 16. RANKING NACIONAL
+# 19. RANKING NACIONAL
 # ============================================================
 
 st.divider()
@@ -1133,9 +1035,39 @@ renderizar_html(
 )
 
 
-# ------------------------------------------------------------
-# SELEÇÃO DO TOP 10
-# ------------------------------------------------------------
+# ============================================================
+# 20. AVISO DE INTERPRETAÇÃO DO RANKING
+# ============================================================
+
+# Este aviso é importante porque o IPH não mede qualidade geral
+# do sistema de saúde, vulnerabilidade socioeconômica ou toda
+# a estrutura hospitalar existente em cada estado.
+#
+# A análise utiliza internações registradas no SIH/SUS e
+# leitos SUS registrados no CNES.
+
+st.info(
+    """
+    **Como interpretar o ranking**
+
+    O CareVision analisa **internações registradas no SIH/SUS**
+    e **leitos SUS registrados no CNES**.
+
+    Por isso, o Índice de Pressão Hospitalar representa a
+    **pressão relativa observada na rede analisada**, e não um
+    indicador geral de vulnerabilidade social, qualidade da saúde
+    ou da situação hospitalar completa de cada estado.
+
+    Assim, estados com menor infraestrutura ou maior
+    vulnerabilidade não necessariamente aparecerão nas primeiras
+    posições do ranking.
+    """
+)
+
+
+# ============================================================
+# 21. TOP 10 NACIONAL
+# ============================================================
 
 top_10 = (
     ranking_valido
@@ -1144,8 +1076,8 @@ top_10 = (
 )
 
 
-# Invertemos a ordem para que a maior pontuação
-# apareça visualmente no topo do gráfico.
+# Invertemos a ordem para que o maior valor fique no topo
+# do gráfico horizontal.
 
 top_10 = top_10.sort_values(
     "indice_pressao",
@@ -1154,10 +1086,8 @@ top_10 = top_10.sort_values(
 
 
 # ============================================================
-# 17. CORES DAS CLASSIFICAÇÕES
+# 22. CORES DAS CLASSIFICAÇÕES
 # ============================================================
-
-# Mantemos a mesma lógica visual em todo o dashboard.
 
 cores_pressao = {
 
@@ -1174,7 +1104,7 @@ cores_pressao = {
 
 
 # ============================================================
-# 18. GRÁFICO DO RANKING
+# 23. GRÁFICO DO RANKING
 # ============================================================
 
 grafico_ranking = px.bar(
@@ -1223,10 +1153,6 @@ grafico_ranking = px.bar(
 )
 
 
-# ------------------------------------------------------------
-# CONFIGURAÇÃO VISUAL DO RANKING
-# ------------------------------------------------------------
-
 grafico_ranking.update_layout(
 
     title_text="",
@@ -1263,9 +1189,6 @@ grafico_ranking.update_layout(
 )
 
 
-# Como o IPH varia de 0 a 100,
-# mantemos sempre a mesma escala.
-
 grafico_ranking.update_xaxes(
     range=[0, 100],
     gridcolor="#EDF1F5",
@@ -1276,10 +1199,6 @@ grafico_ranking.update_yaxes(
     showgrid=False
 )
 
-
-# ------------------------------------------------------------
-# EXIBIÇÃO DO RANKING
-# ------------------------------------------------------------
 
 st.plotly_chart(
     grafico_ranking,
@@ -1292,7 +1211,7 @@ st.plotly_chart(
 
 
 # ============================================================
-# 19. TABELA ANALÍTICA NACIONAL
+# 24. TABELA ANALÍTICA NACIONAL
 # ============================================================
 
 st.divider()
@@ -1323,10 +1242,6 @@ renderizar_html(
 )
 
 
-# ------------------------------------------------------------
-# PREPARAÇÃO DA TABELA
-# ------------------------------------------------------------
-
 tabela_nacional = dados[
     dados["periodo"] == periodo_selecionado
 ][
@@ -1342,20 +1257,12 @@ tabela_nacional = dados[
 ].copy()
 
 
-# Ordenamos da maior para a menor pressão.
-#
-# Registros sem IPH aparecem ao final.
-
 tabela_nacional = tabela_nacional.sort_values(
     "indice_pressao",
     ascending=False,
     na_position="last"
 )
 
-
-# ------------------------------------------------------------
-# RENOMEAÇÃO DAS COLUNAS
-# ------------------------------------------------------------
 
 tabela_nacional = tabela_nacional.rename(
     columns={
@@ -1383,10 +1290,6 @@ tabela_nacional = tabela_nacional.rename(
     }
 )
 
-
-# ============================================================
-# 20. EXIBIÇÃO DA TABELA
-# ============================================================
 
 st.dataframe(
     tabela_nacional,
@@ -1442,7 +1345,7 @@ st.dataframe(
 
 
 # ============================================================
-# 21. METODOLOGIA E LIMITAÇÕES
+# 25. METODOLOGIA E LIMITAÇÕES
 # ============================================================
 
 st.divider()
@@ -1480,11 +1383,27 @@ with st.expander(
         - **Alta:** IPH de 50 até abaixo de 75;
         - **Crítica:** IPH de 75 a 100.
 
+        ### Interpretação dos dados
+
+        O CareVision utiliza **internações registradas no
+        SIH/SUS** e **leitos SUS registrados no CNES**.
+
+        Portanto, o ranking não representa toda a estrutura
+        hospitalar existente no território brasileiro.
+
+        Um estado com maior vulnerabilidade social, menor
+        disponibilidade geral de serviços ou outras dificuldades
+        assistenciais não necessariamente apresentará o maior IPH.
+
         ### Limitações
 
         A relação **internações por leito** é utilizada como
         proxy de carga hospitalar e **não representa taxa
         de ocupação hospitalar**.
+
+        Para calcular uma taxa real de ocupação seriam
+        necessários dados operacionais adicionais, como
+        leitos-dia disponíveis e pacientes-dia.
 
         Os dados de internações utilizados são provenientes
         do **SIH/SUS** e representam internações registradas
@@ -1495,14 +1414,14 @@ with st.expander(
         A população utilizada corresponde às estimativas
         populacionais do **IBGE**.
 
-        O IPH não é um indicador oficial do Ministério da Saúde
-        ou do DATASUS e não possui finalidade clínica.
+        O IPH não é um indicador oficial do Ministério da Saúde,
+        DATASUS, CNES ou IBGE e não possui finalidade clínica.
         """
     )
 
 
 # ============================================================
-# 22. RODAPÉ
+# 26. RODAPÉ
 # ============================================================
 
 renderizar_html(
