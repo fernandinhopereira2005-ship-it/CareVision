@@ -14,6 +14,7 @@
 # - evolução temporal;
 # - Índice de Pressão Hospitalar;
 # - ranking nacional;
+# - mapa do Brasil;
 # - comparações entre UFs;
 # - análises de demanda e capacidade;
 # - tendências recentes;
@@ -35,6 +36,14 @@ import pandas as pd
 # Plotly Express:
 # criação de gráficos interativos.
 import plotly.express as px
+
+# JSON:
+# leitura do arquivo GeoJSON utilizado no mapa do Brasil.
+import json
+
+# Path:
+# facilita a manipulação e validação dos caminhos dos arquivos.
+from pathlib import Path
 
 # Dedent:
 # remove indentação extra de strings HTML multilinha.
@@ -100,7 +109,6 @@ st.markdown(
            =================================================== */
 
         .carevision-header {
-
             background:
                 linear-gradient(
                     120deg,
@@ -110,50 +118,32 @@ st.markdown(
                 );
 
             padding: 28px 34px;
-
             border-radius: 18px;
-
             margin-bottom: 24px;
 
             box-shadow:
                 0px 8px 24px rgba(13, 41, 72, 0.14);
         }
 
-
         .carevision-brand {
-
             color: #FFFFFF;
-
             font-size: 34px;
-
             font-weight: 750;
-
             margin: 0;
-
             letter-spacing: -0.5px;
         }
 
-
         .carevision-subtitle {
-
             color: #D9EAF3;
-
             font-size: 17px;
-
             margin-top: 6px;
-
             margin-bottom: 0px;
         }
 
-
         .carevision-source {
-
             color: #AFC8DA;
-
             font-size: 13px;
-
             margin-top: 12px;
-
             margin-bottom: 0px;
         }
 
@@ -163,39 +153,24 @@ st.markdown(
            =================================================== */
 
         .section-label {
-
             color: #087F8C;
-
             font-size: 12px;
-
             font-weight: 700;
-
             letter-spacing: 1.3px;
-
             text-transform: uppercase;
-
             margin-bottom: 3px;
         }
 
-
         .section-title {
-
             color: #102A43;
-
             font-size: 24px;
-
             font-weight: 700;
-
             margin-bottom: 4px;
         }
 
-
         .section-description {
-
             color: #68798A;
-
             font-size: 14px;
-
             margin-bottom: 18px;
         }
 
@@ -205,54 +180,34 @@ st.markdown(
            =================================================== */
 
         .kpi-card {
-
             background-color: #FFFFFF;
-
             border: 1px solid #E7ECF1;
-
             border-radius: 15px;
-
             padding: 19px 20px;
-
             min-height: 126px;
 
             box-shadow:
                 0px 3px 12px rgba(22, 45, 66, 0.06);
         }
 
-
         .kpi-label {
-
             color: #718096;
-
             font-size: 12px;
-
             font-weight: 650;
-
             letter-spacing: 0.6px;
-
             text-transform: uppercase;
-
             margin-bottom: 9px;
         }
 
-
         .kpi-value {
-
             color: #102A43;
-
             font-size: 27px;
-
             font-weight: 750;
-
             margin-bottom: 4px;
         }
 
-
         .kpi-description {
-
             color: #98A6B3;
-
             font-size: 11px;
         }
 
@@ -262,46 +217,30 @@ st.markdown(
            =================================================== */
 
         .status-card {
-
             border-radius: 15px;
-
             padding: 20px 24px;
-
             min-height: 126px;
 
             box-shadow:
                 0px 3px 12px rgba(22, 45, 66, 0.06);
         }
 
-
         .status-label {
-
             font-size: 12px;
-
             font-weight: 700;
-
             text-transform: uppercase;
-
             letter-spacing: 0.7px;
-
             margin-bottom: 7px;
         }
 
-
         .status-value {
-
             font-size: 25px;
-
             font-weight: 800;
-
             margin-bottom: 4px;
         }
 
-
         .status-description {
-
             font-size: 11px;
-
             opacity: 0.80;
         }
 
@@ -311,52 +250,33 @@ st.markdown(
            =================================================== */
 
         .context-card {
-
             background-color: #FFFFFF;
-
             border: 1px solid #E7ECF1;
-
             border-radius: 14px;
-
             padding: 16px 18px;
 
             box-shadow:
                 0px 2px 10px rgba(22, 45, 66, 0.05);
         }
 
-
         .context-label {
-
             color: #718096;
-
             font-size: 11px;
-
             font-weight: 650;
-
             text-transform: uppercase;
-
             letter-spacing: 0.5px;
         }
 
-
         .context-value {
-
             color: #102A43;
-
             font-size: 21px;
-
             font-weight: 750;
-
             margin-top: 4px;
         }
 
-
         .context-caption {
-
             color: #98A6B3;
-
             font-size: 11px;
-
             margin-top: 3px;
         }
 
@@ -366,13 +286,9 @@ st.markdown(
            =================================================== */
 
         [data-testid="stPlotlyChart"] {
-
             background-color: #FFFFFF;
-
             border: 1px solid #E7ECF1;
-
             border-radius: 16px;
-
             padding: 7px;
 
             box-shadow:
@@ -385,9 +301,7 @@ st.markdown(
            =================================================== */
 
         [data-testid="stDataFrame"] {
-
             background-color: #FFFFFF;
-
             border-radius: 14px;
 
             box-shadow:
@@ -400,15 +314,10 @@ st.markdown(
            =================================================== */
 
         .carevision-footer {
-
             text-align: center;
-
             color: #8291A1;
-
             font-size: 12px;
-
             padding-top: 15px;
-
             padding-bottom: 10px;
         }
 
@@ -420,14 +329,26 @@ st.markdown(
 
 
 # ============================================================
-# 4. CARREGAMENTO DA BASE
+# 4. CAMINHOS DOS ARQUIVOS
+# ============================================================
+
+# Base analítica utilizada pelo dashboard.
+CAMINHO_BASE = Path("carevision_base_final.csv")
+
+# Arquivo geográfico dos estados brasileiros.
+CAMINHO_GEOJSON = Path(
+    "data/geo/estados_brasil.geojson"
+)
+
+
+# ============================================================
+# 5. CARREGAMENTO DA BASE
 # ============================================================
 
 dados = pd.read_csv(
-    "carevision_base_final.csv",
+    CAMINHO_BASE,
     encoding="utf-8-sig"
 )
-
 
 # Converte a coluna de data para datetime.
 dados["data"] = pd.to_datetime(
@@ -437,7 +358,98 @@ dados["data"] = pd.to_datetime(
 
 
 # ============================================================
-# 5. FUNÇÕES AUXILIARES
+# 6. CARREGAMENTO DO GEOJSON
+# ============================================================
+
+# Inicializamos a variável como None.
+# Assim, caso o arquivo não seja encontrado, o restante
+# do dashboard continua funcionando normalmente.
+
+geojson_estados = None
+
+
+if CAMINHO_GEOJSON.exists():
+
+    try:
+
+        # Abre o arquivo GeoJSON utilizando UTF-8.
+        with open(
+            CAMINHO_GEOJSON,
+            "r",
+            encoding="utf-8"
+        ) as arquivo_geo:
+
+            geojson_estados = json.load(
+                arquivo_geo
+            )
+
+
+        # ----------------------------------------------------
+        # PADRONIZAÇÃO DO NOME DAS UFs
+        # ----------------------------------------------------
+        #
+        # Para que o mapa consiga relacionar cada polígono
+        # do GeoJSON com a coluna "uf" da nossa base,
+        # criamos uma propriedade padronizada chamada:
+        #
+        # carevision_uf
+        #
+        # O código procura automaticamente algumas
+        # nomenclaturas comuns utilizadas em GeoJSONs.
+
+        propriedades_possiveis = [
+
+            "nome",
+            "name",
+            "NM_UF",
+            "nm_uf",
+            "estado",
+            "Estado"
+        ]
+
+
+        for feature in geojson_estados.get(
+            "features",
+            []
+        ):
+
+            propriedades = feature.get(
+                "properties",
+                {}
+            )
+
+            nome_encontrado = None
+
+
+            for propriedade in propriedades_possiveis:
+
+                if propriedade in propriedades:
+
+                    nome_encontrado = propriedades[
+                        propriedade
+                    ]
+
+                    break
+
+
+            # Cria uma nova propriedade padronizada.
+            propriedades[
+                "carevision_uf"
+            ] = nome_encontrado
+
+
+    except Exception as erro:
+
+        geojson_estados = None
+
+        st.warning(
+            "O arquivo do mapa foi encontrado, mas não pôde "
+            f"ser carregado. Detalhes: {erro}"
+        )
+
+
+# ============================================================
+# 7. FUNÇÕES AUXILIARES
 # ============================================================
 
 def formatar_inteiro(valor):
@@ -448,7 +460,6 @@ def formatar_inteiro(valor):
     """
 
     if pd.isna(valor):
-
         return "Sem dado"
 
     return f"{valor:,.0f}".replace(",", ".")
@@ -462,7 +473,6 @@ def formatar_decimal(valor, casas=2):
     """
 
     if pd.isna(valor):
-
         return "Sem dado"
 
     return f"{valor:.{casas}f}".replace(".", ",")
@@ -520,13 +530,17 @@ def renderizar_html(conteudo):
     Renderiza elementos HTML personalizados.
     """
 
-    conteudo_limpo = dedent(conteudo)
+    conteudo_limpo = dedent(
+        conteudo
+    )
 
-    st.html(conteudo_limpo)
+    st.html(
+        conteudo_limpo
+    )
 
 
 # ============================================================
-# 6. CORES DOS NÍVEIS DE PRESSÃO
+# 8. CORES DOS NÍVEIS DE PRESSÃO
 # ============================================================
 
 cores_pressao = {
@@ -544,7 +558,7 @@ cores_pressao = {
 
 
 # ============================================================
-# 7. CABEÇALHO
+# 9. CABEÇALHO
 # ============================================================
 
 renderizar_html(
@@ -569,7 +583,7 @@ renderizar_html(
 
 
 # ============================================================
-# 8. SIDEBAR
+# 10. SIDEBAR
 # ============================================================
 
 st.sidebar.markdown(
@@ -586,20 +600,23 @@ st.sidebar.divider()
 
 
 # ============================================================
-# 9. FILTRO DE PERÍODO
+# 11. FILTRO DE PERÍODO
 # ============================================================
 
 periodos = (
 
     dados[
-        ["periodo", "data"]
+        [
+            "periodo",
+            "data"
+        ]
     ]
 
     .drop_duplicates()
 
-    .sort_values("data")[
-        "periodo"
-    ]
+    .sort_values(
+        "data"
+    )["periodo"]
 
     .tolist()
 )
@@ -616,7 +633,7 @@ periodo_selecionado = st.sidebar.selectbox(
 
 
 # ============================================================
-# 10. FILTRO DE UF
+# 12. FILTRO DE UF
 # ============================================================
 
 ufs = sorted(
@@ -653,7 +670,7 @@ uf_selecionada = st.sidebar.selectbox(
 
 
 # ============================================================
-# 11. INFORMAÇÕES DO IPH NA SIDEBAR
+# 13. INFORMAÇÕES DO IPH NA SIDEBAR
 # ============================================================
 
 st.sidebar.divider()
@@ -681,25 +698,31 @@ st.sidebar.caption(
 
 
 # ============================================================
-# 12. FILTRAGEM DA UF SELECIONADA
+# 14. FILTRAGEM DA UF SELECIONADA
 # ============================================================
 
 dados_filtrados = dados[
 
-    (dados["periodo"] == periodo_selecionado)
+    (
+        dados["periodo"]
+        == periodo_selecionado
+    )
 
     &
 
-    (dados["uf"] == uf_selecionada)
+    (
+        dados["uf"]
+        == uf_selecionada
+    )
+
 ]
 
 
-# Obtém o registro correspondente.
 registro = dados_filtrados.iloc[0]
 
 
 # ============================================================
-# 13. PREPARAÇÃO DO RANKING DO PERÍODO
+# 15. PREPARAÇÃO DO RANKING DO PERÍODO
 # ============================================================
 
 ranking_periodo = dados[
@@ -710,7 +733,17 @@ ranking_periodo = dados[
 ].copy()
 
 
-# Retira UFs sem IPH calculado.
+# Garante que valores ausentes tenham classificação
+# explícita para gráficos e mapa.
+ranking_periodo[
+    "nivel_pressao"
+] = ranking_periodo[
+    "nivel_pressao"
+].fillna(
+    "Sem dado"
+)
+
+
 ranking_valido = ranking_periodo.dropna(
 
     subset=[
@@ -720,17 +753,17 @@ ranking_valido = ranking_periodo.dropna(
 ).copy()
 
 
-# Ordena do maior IPH para o menor.
 ranking_valido = ranking_valido.sort_values(
 
     "indice_pressao",
 
     ascending=False
 
-).reset_index(drop=True)
+).reset_index(
+    drop=True
+)
 
 
-# Cria posição nacional.
 ranking_valido[
     "posicao_dashboard"
 ] = range(
@@ -742,7 +775,7 @@ ranking_valido[
 
 
 # ============================================================
-# 14. POSIÇÃO NACIONAL DA UF
+# 16. POSIÇÃO NACIONAL DA UF
 # ============================================================
 
 posicao_uf = ranking_valido[
@@ -763,7 +796,6 @@ if len(posicao_uf) > 0:
     )
 
     valor_ranking = (
-
         f"{posicao_uf}º de "
         f"{len(ranking_valido)}"
     )
@@ -774,7 +806,7 @@ else:
 
 
 # ============================================================
-# 15. VISÃO GERAL
+# 17. VISÃO GERAL
 # ============================================================
 
 renderizar_html(
@@ -804,7 +836,7 @@ renderizar_html(
 
 
 # ============================================================
-# 16. PREPARAÇÃO DOS KPIs
+# 18. PREPARAÇÃO DOS KPIs
 # ============================================================
 
 valor_internacoes = formatar_inteiro(
@@ -831,7 +863,9 @@ nivel_pressao = registro[
 ]
 
 
-if pd.isna(nivel_pressao):
+if pd.isna(
+    nivel_pressao
+):
 
     nivel_pressao = "Sem dado"
 
@@ -842,11 +876,17 @@ estilo_pressao = obter_estilo_pressao(
 
 
 # ============================================================
-# 17. CARDS PRINCIPAIS
+# 19. CARDS PRINCIPAIS
 # ============================================================
 
 col1, col2, col3, col4, col5 = st.columns(
-    [1, 1, 1, 1, 1.15]
+    [
+        1,
+        1,
+        1,
+        1,
+        1.15
+    ]
 )
 
 
@@ -973,7 +1013,7 @@ with col5:
 
 
 # ============================================================
-# 18. CONTEXTO DA UF
+# 20. CONTEXTO DA UF
 # ============================================================
 
 st.markdown(
@@ -981,12 +1021,10 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-contexto1, contexto2, contexto3 = st.columns(3)
+contexto1, contexto2, contexto3 = st.columns(
+    3
+)
 
-
-# ============================================================
-# VARIAÇÃO MENSAL
-# ============================================================
 
 with contexto1:
 
@@ -1000,10 +1038,13 @@ with contexto1:
             "variacao_percentual"
         ]
 
-        sinal = "+" if variacao > 0 else ""
+        sinal = (
+            "+"
+            if variacao > 0
+            else ""
+        )
 
         valor_variacao = (
-
             f"{sinal}"
             f"{formatar_decimal(variacao, 2)}%"
         )
@@ -1034,10 +1075,6 @@ with contexto1:
     )
 
 
-# ============================================================
-# POSIÇÃO NACIONAL
-# ============================================================
-
 with contexto2:
 
     renderizar_html(
@@ -1060,10 +1097,6 @@ with contexto2:
         """
     )
 
-
-# ============================================================
-# COBERTURA DA ANÁLISE
-# ============================================================
 
 with contexto3:
 
@@ -1093,7 +1126,7 @@ with contexto3:
 
 
 # ============================================================
-# 19. EVOLUÇÃO DAS INTERNAÇÕES
+# 21. EVOLUÇÃO DAS INTERNAÇÕES
 # ============================================================
 
 st.divider()
@@ -1149,12 +1182,8 @@ grafico_internacoes = px.line(
     markers=True,
 
     labels={
-
-        "data":
-            "Período",
-
-        "internacoes":
-            "Internações"
+        "data": "Período",
+        "internacoes": "Internações"
     }
 )
 
@@ -1208,7 +1237,7 @@ st.plotly_chart(
 
 
 # ============================================================
-# 20. EVOLUÇÃO DO IPH
+# 22. EVOLUÇÃO DO IPH
 # ============================================================
 
 st.divider()
@@ -1259,12 +1288,8 @@ grafico_iph = px.line(
     markers=True,
 
     labels={
-
-        "data":
-            "Período",
-
-        "indice_pressao":
-            "Índice de Pressão"
+        "data": "Período",
+        "indice_pressao": "Índice de Pressão"
     }
 )
 
@@ -1312,6 +1337,24 @@ grafico_iph.update_xaxes(
 )
 
 
+# Adicionamos linhas de referência para ajudar na
+# interpretação das faixas do IPH.
+grafico_iph.add_hline(
+    y=25,
+    line_dash="dot"
+)
+
+grafico_iph.add_hline(
+    y=50,
+    line_dash="dot"
+)
+
+grafico_iph.add_hline(
+    y=75,
+    line_dash="dot"
+)
+
+
 st.plotly_chart(
 
     grafico_iph,
@@ -1325,7 +1368,7 @@ st.plotly_chart(
 
 
 # ============================================================
-# 21. RANKING NACIONAL
+# 23. RANKING NACIONAL
 # ============================================================
 
 st.divider()
@@ -1357,7 +1400,7 @@ renderizar_html(
 
 
 # ============================================================
-# 22. AVISO DE INTERPRETAÇÃO
+# 24. AVISO DE INTERPRETAÇÃO
 # ============================================================
 
 st.info(
@@ -1380,7 +1423,7 @@ st.info(
 
 
 # ============================================================
-# 23. TOP 10
+# 25. TOP 10
 # ============================================================
 
 top_10 = (
@@ -1417,20 +1460,15 @@ grafico_ranking = px.bar(
 
     hover_data={
 
-        "internacoes":
-            ":,.0f",
+        "internacoes": ":,.0f",
 
-        "leitos_sus":
-            ":,.0f",
+        "leitos_sus": ":,.0f",
 
-        "internacoes_por_leito":
-            ":.2f",
+        "internacoes_por_leito": ":.2f",
 
-        "variacao_percentual":
-            ":.2f",
+        "variacao_percentual": ":.2f",
 
-        "indice_pressao":
-            ":.1f"
+        "indice_pressao": ":.1f"
     },
 
     labels={
@@ -1526,7 +1564,261 @@ st.plotly_chart(
 
 
 # ============================================================
-# 24. EXPLICABILIDADE DO IPH
+# 26. MAPA DO BRASIL
+# ============================================================
+
+st.divider()
+
+renderizar_html(
+    """
+    <div class="section-label">
+        DISTRIBUIÇÃO ESPACIAL
+    </div>
+    """
+)
+
+renderizar_html(
+    f"""
+    <div class="section-title">
+        Mapa da Pressão Hospitalar • {periodo_selecionado}
+    </div>
+    """
+)
+
+renderizar_html(
+    """
+    <div class="section-description">
+        Distribuição geográfica do nível de pressão hospitalar
+        entre as Unidades da Federação.
+    </div>
+    """
+)
+
+
+# ============================================================
+# 27. PREPARAÇÃO DOS DADOS DO MAPA
+# ============================================================
+
+# O mapa utiliza todos os estados do período selecionado.
+dados_mapa = ranking_periodo.copy()
+
+
+# Substitui classificações ausentes por "Sem dado".
+#
+# Isso é especialmente importante em períodos nos quais
+# alguma UF não possui informações suficientes para
+# o cálculo do IPH.
+dados_mapa[
+    "nivel_pressao"
+] = dados_mapa[
+    "nivel_pressao"
+].fillna(
+    "Sem dado"
+)
+
+
+# ============================================================
+# 28. CONSTRUÇÃO DO MAPA
+# ============================================================
+
+if geojson_estados is not None:
+
+    grafico_mapa = px.choropleth(
+
+        dados_mapa,
+
+        # Arquivo com os polígonos dos estados.
+        geojson=geojson_estados,
+
+        # A coluna "uf" contém o nome completo dos estados.
+        locations="uf",
+
+        # Dentro do GeoJSON criamos anteriormente a
+        # propriedade padronizada "carevision_uf".
+        featureidkey=
+            "properties.carevision_uf",
+
+        # O mapa é colorido de acordo com o nível
+        # de pressão hospitalar.
+        color="nivel_pressao",
+
+        # Mantemos exatamente as mesmas cores utilizadas
+        # nos demais gráficos do dashboard.
+        color_discrete_map=cores_pressao,
+
+        # Ao passar o mouse sobre um estado, o nome da UF
+        # aparece em destaque.
+        hover_name="uf",
+
+        # Informações adicionais exibidas no tooltip.
+        hover_data={
+
+            "indice_pressao": ":.1f",
+
+            "internacoes": ":,.0f",
+
+            "leitos_sus": ":,.0f",
+
+            "internacoes_por_leito": ":.2f",
+
+            "internacoes_100mil": ":.2f",
+
+            "leitos_100mil": ":.2f",
+
+            "nivel_pressao": True
+        },
+
+        labels={
+
+            "uf":
+                "UF",
+
+            "indice_pressao":
+                "Índice de Pressão",
+
+            "nivel_pressao":
+                "Nível de Pressão",
+
+            "internacoes":
+                "Internações",
+
+            "leitos_sus":
+                "Leitos SUS",
+
+            "internacoes_por_leito":
+                "Internações / leito",
+
+            "internacoes_100mil":
+                "Internações / 100 mil",
+
+            "leitos_100mil":
+                "Leitos SUS / 100 mil"
+        },
+
+        # Ordem lógica da legenda.
+        category_orders={
+
+            "nivel_pressao": [
+
+                "Baixa",
+
+                "Moderada",
+
+                "Alta",
+
+                "Crítica",
+
+                "Sem dado"
+            ]
+        }
+    )
+
+
+    # ========================================================
+    # AJUSTES GEOGRÁFICOS
+    # ========================================================
+
+    grafico_mapa.update_geos(
+
+        # Ajusta automaticamente a visualização aos
+        # polígonos presentes no GeoJSON.
+        fitbounds="locations",
+
+        # Remove o mapa-múndi ao redor,
+        # deixando apenas o Brasil em destaque.
+        visible=False,
+
+        # Fundo transparente/claro.
+        bgcolor="rgba(0,0,0,0)"
+    )
+
+
+    # ========================================================
+    # AJUSTES VISUAIS
+    # ========================================================
+
+    grafico_mapa.update_layout(
+
+        template="plotly_white",
+
+        title_text="",
+
+        height=650,
+
+        margin=dict(
+            l=0,
+            r=0,
+            t=50,
+            b=0
+        ),
+
+        legend_title_text=
+            "Nível de pressão",
+
+        legend=dict(
+
+            orientation="h",
+
+            yanchor="bottom",
+
+            y=1.01,
+
+            xanchor="center",
+
+            x=0.5
+        ),
+
+        paper_bgcolor=
+            "rgba(0,0,0,0)",
+
+        plot_bgcolor=
+            "rgba(0,0,0,0)"
+    )
+
+
+    # Deixa as divisões entre estados um pouco mais visíveis.
+    grafico_mapa.update_traces(
+
+        marker_line_color="#FFFFFF",
+
+        marker_line_width=1.2
+    )
+
+
+    st.plotly_chart(
+
+        grafico_mapa,
+
+        use_container_width=True,
+
+        config={
+            "displayModeBar": False
+        }
+    )
+
+
+    st.caption(
+        "As cores representam a classificação do IPH no período "
+        "selecionado. UFs sem informações suficientes para o cálculo "
+        "do índice são apresentadas em cinza."
+    )
+
+
+else:
+
+    st.warning(
+        """
+        O mapa não pôde ser carregado.
+
+        Verifique se o arquivo
+        `data/geo/estados_brasil.geojson`
+        está presente no repositório.
+        """
+    )
+
+
+# ============================================================
+# 29. EXPLICABILIDADE DO IPH
 # ============================================================
 
 st.divider()
@@ -1558,13 +1850,8 @@ renderizar_html(
 
 
 # ============================================================
-# 25. IDENTIFICAÇÃO DOS COMPONENTES DO IPH
+# 30. IDENTIFICAÇÃO DOS COMPONENTES DO IPH
 # ============================================================
-
-# Dependendo da versão utilizada na geração do CSV,
-# os nomes dos scores intermediários podem variar.
-#
-# O código abaixo procura algumas nomenclaturas possíveis.
 
 coluna_score_capacidade = None
 coluna_score_populacao = None
@@ -1629,7 +1916,7 @@ for coluna in possiveis_tendencia:
 
 
 # ============================================================
-# 26. GRÁFICO DOS COMPONENTES
+# 31. GRÁFICO DOS COMPONENTES
 # ============================================================
 
 if (
@@ -1651,8 +1938,6 @@ if (
     ]
 
 
-    # Caso os scores estejam na escala de 0 a 1,
-    # convertemos para 0 a 100 apenas para visualização.
     valores_scores = [
 
         valor_capacidade,
@@ -1663,6 +1948,9 @@ if (
     ]
 
 
+    # Caso os scores estejam na escala 0–1,
+    # convertemos para escala 0–100 apenas
+    # para facilitar a leitura visual.
     if max(
         [
             valor
@@ -1731,9 +2019,11 @@ if (
 
     grafico_componentes.update_traces(
 
-        texttemplate="Peso: %{text}",
+        texttemplate=
+            "Peso: %{text}",
 
-        textposition="outside"
+        textposition=
+            "outside"
     )
 
 
@@ -1743,7 +2033,8 @@ if (
 
         title_text="",
 
-        yaxis_title="Score relativo",
+        yaxis_title=
+            "Score relativo",
 
         xaxis_title="",
 
@@ -1809,7 +2100,7 @@ else:
 
 
 # ============================================================
-# 27. DEMANDA × CAPACIDADE
+# 32. DEMANDA × CAPACIDADE
 # ============================================================
 
 st.divider()
@@ -1868,7 +2159,8 @@ grafico_dispersao = px.scatter(
 
     hover_name="uf",
 
-    color_discrete_map=cores_pressao,
+    color_discrete_map=
+        cores_pressao,
 
     size_max=35,
 
@@ -1952,7 +2244,7 @@ st.caption(
 
 
 # ============================================================
-# 28. DISTRIBUIÇÃO DAS CLASSIFICAÇÕES
+# 33. DISTRIBUIÇÃO DAS CLASSIFICAÇÕES
 # ============================================================
 
 st.divider()
@@ -1989,7 +2281,9 @@ distribuicao_pressao = (
         "nivel_pressao"
     ]
 
-    .fillna("Sem dado")
+    .fillna(
+        "Sem dado"
+    )
 
     .value_counts()
 
@@ -2032,7 +2326,8 @@ grafico_distribuicao = px.bar(
 
     color="Nível",
 
-    color_discrete_map=cores_pressao,
+    color_discrete_map=
+        cores_pressao,
 
     text="Quantidade"
 )
@@ -2053,7 +2348,8 @@ grafico_distribuicao.update_layout(
 
     xaxis_title="",
 
-    yaxis_title="Quantidade de UFs",
+    yaxis_title=
+        "Quantidade de UFs",
 
     showlegend=False,
 
@@ -2092,7 +2388,7 @@ st.plotly_chart(
 
 
 # ============================================================
-# 29. TENDÊNCIA RECENTE
+# 34. TENDÊNCIA RECENTE
 # ============================================================
 
 st.divider()
@@ -2133,7 +2429,7 @@ variacoes_validas = ranking_periodo.dropna(
 
 
 # ============================================================
-# TOP 5 AUMENTOS
+# 35. TOP 5 AUMENTOS
 # ============================================================
 
 maiores_aumentos = (
@@ -2155,7 +2451,7 @@ maiores_aumentos = (
 
 
 # ============================================================
-# TOP 5 REDUÇÕES
+# 36. TOP 5 REDUÇÕES
 # ============================================================
 
 maiores_quedas = (
@@ -2176,11 +2472,13 @@ maiores_quedas = (
 )
 
 
-col_aumento, col_queda = st.columns(2)
+col_aumento, col_queda = st.columns(
+    2
+)
 
 
 # ============================================================
-# GRÁFICO DE AUMENTOS
+# 37. GRÁFICO DE AUMENTOS
 # ============================================================
 
 with col_aumento:
@@ -2272,7 +2570,7 @@ with col_aumento:
 
 
 # ============================================================
-# GRÁFICO DE REDUÇÕES
+# 38. GRÁFICO DE REDUÇÕES
 # ============================================================
 
 with col_queda:
@@ -2364,7 +2662,7 @@ with col_queda:
 
 
 # ============================================================
-# 30. TABELA ANALÍTICA NACIONAL
+# 39. TABELA ANALÍTICA NACIONAL
 # ============================================================
 
 st.divider()
@@ -2565,11 +2863,8 @@ st.dataframe(
 
 
 # ============================================================
-# 31. DOWNLOAD DA TABELA
+# 40. DOWNLOAD DA TABELA
 # ============================================================
-
-# Transformamos a tabela do período selecionado em CSV
-# para permitir que o usuário baixe os resultados.
 
 csv_download = tabela_nacional.to_csv(
 
@@ -2596,7 +2891,7 @@ st.download_button(
 
 
 # ============================================================
-# 32. METODOLOGIA E LIMITAÇÕES
+# 41. METODOLOGIA E LIMITAÇÕES
 # ============================================================
 
 st.divider()
@@ -2696,7 +2991,7 @@ with st.expander(
 
 
 # ============================================================
-# 33. RODAPÉ
+# 42. RODAPÉ
 # ============================================================
 
 renderizar_html(
