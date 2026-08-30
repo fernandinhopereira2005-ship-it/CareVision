@@ -28,6 +28,11 @@ import pandas as pd
 # construção dos gráficos interativos.
 import plotly.express as px
 
+# Dedent:
+# remove a indentação extra existente nas strings HTML
+# multilinha antes de enviá-las ao Streamlit.
+from textwrap import dedent
+
 
 # ============================================================
 # 2. CONFIGURAÇÃO DA PÁGINA
@@ -54,272 +59,276 @@ st.set_page_config(
 # CareVision, mantendo uma aparência limpa e profissional.
 
 st.markdown(
-    """
-    <style>
+    dedent(
+        """
+        <style>
 
-    /* =======================================================
-       CONFIGURAÇÃO GERAL DA PÁGINA
-       ======================================================= */
+        /* ===================================================
+           CONFIGURAÇÃO GERAL DA PÁGINA
+           =================================================== */
 
-    .stApp {
-        background-color: #F5F7FA;
-    }
+        .stApp {
+            background-color: #F5F7FA;
+        }
 
-    .block-container {
-        max-width: 1450px;
-        padding-top: 1.5rem;
-        padding-bottom: 3rem;
-    }
-
-
-    /* =======================================================
-       SIDEBAR
-       ======================================================= */
-
-    [data-testid="stSidebar"] {
-        background-color: #0D2948;
-    }
-
-    [data-testid="stSidebar"] * {
-        color: #FFFFFF;
-    }
-
-    [data-testid="stSidebar"] label {
-        font-weight: 600;
-    }
+        .block-container {
+            max-width: 1450px;
+            padding-top: 1.5rem;
+            padding-bottom: 3rem;
+        }
 
 
-    /* =======================================================
-       CABEÇALHO PRINCIPAL
-       ======================================================= */
+        /* ===================================================
+           SIDEBAR
+           =================================================== */
 
-    .carevision-header {
-        background:
-            linear-gradient(
-                120deg,
-                #0D2948 0%,
-                #12476F 55%,
-                #087F8C 100%
-            );
+        [data-testid="stSidebar"] {
+            background-color: #0D2948;
+        }
 
-        padding: 28px 34px;
-        border-radius: 18px;
-        margin-bottom: 24px;
+        [data-testid="stSidebar"] * {
+            color: #FFFFFF;
+        }
 
-        box-shadow:
-            0px 8px 24px rgba(13, 41, 72, 0.14);
-    }
-
-    .carevision-brand {
-        color: #FFFFFF;
-        font-size: 34px;
-        font-weight: 750;
-        margin: 0;
-        letter-spacing: -0.5px;
-    }
-
-    .carevision-subtitle {
-        color: #D9EAF3;
-        font-size: 17px;
-        margin-top: 6px;
-        margin-bottom: 0px;
-    }
-
-    .carevision-source {
-        color: #AFC8DA;
-        font-size: 13px;
-        margin-top: 12px;
-        margin-bottom: 0px;
-    }
+        [data-testid="stSidebar"] label {
+            font-weight: 600;
+        }
 
 
-    /* =======================================================
-       TÍTULOS DAS SEÇÕES
-       ======================================================= */
+        /* ===================================================
+           CABEÇALHO PRINCIPAL
+           =================================================== */
 
-    .section-label {
-        color: #087F8C;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 1.3px;
-        text-transform: uppercase;
-        margin-bottom: 3px;
-    }
+        .carevision-header {
+            background:
+                linear-gradient(
+                    120deg,
+                    #0D2948 0%,
+                    #12476F 55%,
+                    #087F8C 100%
+                );
 
-    .section-title {
-        color: #102A43;
-        font-size: 24px;
-        font-weight: 700;
-        margin-bottom: 4px;
-    }
+            padding: 28px 34px;
+            border-radius: 18px;
+            margin-bottom: 24px;
 
-    .section-description {
-        color: #68798A;
-        font-size: 14px;
-        margin-bottom: 18px;
-    }
+            box-shadow:
+                0px 8px 24px rgba(13, 41, 72, 0.14);
+        }
 
+        .carevision-brand {
+            color: #FFFFFF;
+            font-size: 34px;
+            font-weight: 750;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
 
-    /* =======================================================
-       CARDS DOS INDICADORES
-       ======================================================= */
+        .carevision-subtitle {
+            color: #D9EAF3;
+            font-size: 17px;
+            margin-top: 6px;
+            margin-bottom: 0px;
+        }
 
-    .kpi-card {
-        background-color: #FFFFFF;
-        border: 1px solid #E7ECF1;
-        border-radius: 15px;
-
-        padding: 19px 20px;
-        min-height: 126px;
-
-        box-shadow:
-            0px 3px 12px rgba(22, 45, 66, 0.06);
-    }
-
-    .kpi-label {
-        color: #718096;
-        font-size: 12px;
-        font-weight: 650;
-        letter-spacing: 0.6px;
-        text-transform: uppercase;
-        margin-bottom: 9px;
-    }
-
-    .kpi-value {
-        color: #102A43;
-        font-size: 27px;
-        font-weight: 750;
-        margin-bottom: 4px;
-    }
-
-    .kpi-description {
-        color: #98A6B3;
-        font-size: 11px;
-    }
+        .carevision-source {
+            color: #AFC8DA;
+            font-size: 13px;
+            margin-top: 12px;
+            margin-bottom: 0px;
+        }
 
 
-    /* =======================================================
-       CARD DE STATUS DO IPH
-       ======================================================= */
+        /* ===================================================
+           TÍTULOS DAS SEÇÕES
+           =================================================== */
 
-    .status-card {
-        border-radius: 15px;
-        padding: 20px 24px;
-        min-height: 126px;
-        box-shadow:
-            0px 3px 12px rgba(22, 45, 66, 0.06);
-    }
+        .section-label {
+            color: #087F8C;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
 
-    .status-label {
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.7px;
-        margin-bottom: 7px;
-    }
+        .section-title {
+            color: #102A43;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
 
-    .status-value {
-        font-size: 25px;
-        font-weight: 800;
-        margin-bottom: 4px;
-    }
-
-    .status-description {
-        font-size: 11px;
-        opacity: 0.80;
-    }
+        .section-description {
+            color: #68798A;
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
 
 
-    /* =======================================================
-       CARDS DE CONTEXTO
-       ======================================================= */
+        /* ===================================================
+           CARDS DOS INDICADORES
+           =================================================== */
 
-    .context-card {
-        background-color: #FFFFFF;
-        border: 1px solid #E7ECF1;
-        border-radius: 14px;
-        padding: 16px 18px;
+        .kpi-card {
+            background-color: #FFFFFF;
+            border: 1px solid #E7ECF1;
+            border-radius: 15px;
 
-        box-shadow:
-            0px 2px 10px rgba(22, 45, 66, 0.05);
-    }
+            padding: 19px 20px;
+            min-height: 126px;
 
-    .context-label {
-        color: #718096;
-        font-size: 11px;
-        font-weight: 650;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
+            box-shadow:
+                0px 3px 12px rgba(22, 45, 66, 0.06);
+        }
 
-    .context-value {
-        color: #102A43;
-        font-size: 21px;
-        font-weight: 750;
-        margin-top: 4px;
-    }
+        .kpi-label {
+            color: #718096;
+            font-size: 12px;
+            font-weight: 650;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            margin-bottom: 9px;
+        }
 
-    .context-caption {
-        color: #98A6B3;
-        font-size: 11px;
-        margin-top: 3px;
-    }
+        .kpi-value {
+            color: #102A43;
+            font-size: 27px;
+            font-weight: 750;
+            margin-bottom: 4px;
+        }
 
-
-    /* =======================================================
-       CONTAINERS E GRÁFICOS
-       ======================================================= */
-
-    [data-testid="stPlotlyChart"] {
-        background-color: #FFFFFF;
-        border: 1px solid #E7ECF1;
-        border-radius: 16px;
-        padding: 7px;
-
-        box-shadow:
-            0px 3px 12px rgba(22, 45, 66, 0.05);
-    }
+        .kpi-description {
+            color: #98A6B3;
+            font-size: 11px;
+        }
 
 
-    /* =======================================================
-       DATAFRAME
-       ======================================================= */
+        /* ===================================================
+           CARD DE STATUS DO IPH
+           =================================================== */
 
-    [data-testid="stDataFrame"] {
-        background-color: #FFFFFF;
-        border-radius: 14px;
+        .status-card {
+            border-radius: 15px;
+            padding: 20px 24px;
+            min-height: 126px;
 
-        box-shadow:
-            0px 3px 12px rgba(22, 45, 66, 0.05);
-    }
+            box-shadow:
+                0px 3px 12px rgba(22, 45, 66, 0.06);
+        }
+
+        .status-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 7px;
+        }
+
+        .status-value {
+            font-size: 25px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .status-description {
+            font-size: 11px;
+            opacity: 0.80;
+        }
 
 
-    /* =======================================================
-       DIVISORES
-       ======================================================= */
+        /* ===================================================
+           CARDS DE CONTEXTO
+           =================================================== */
 
-    hr {
-        border: none;
-        border-top: 1px solid #E7ECF1;
-        margin-top: 28px;
-        margin-bottom: 28px;
-    }
+        .context-card {
+            background-color: #FFFFFF;
+            border: 1px solid #E7ECF1;
+            border-radius: 14px;
+
+            padding: 16px 18px;
+
+            box-shadow:
+                0px 2px 10px rgba(22, 45, 66, 0.05);
+        }
+
+        .context-label {
+            color: #718096;
+            font-size: 11px;
+            font-weight: 650;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .context-value {
+            color: #102A43;
+            font-size: 21px;
+            font-weight: 750;
+            margin-top: 4px;
+        }
+
+        .context-caption {
+            color: #98A6B3;
+            font-size: 11px;
+            margin-top: 3px;
+        }
 
 
-    /* =======================================================
-       RODAPÉ
-       ======================================================= */
+        /* ===================================================
+           CONTAINERS E GRÁFICOS
+           =================================================== */
 
-    .carevision-footer {
-        text-align: center;
-        color: #8291A1;
-        font-size: 12px;
-        padding-top: 15px;
-        padding-bottom: 10px;
-    }
+        [data-testid="stPlotlyChart"] {
+            background-color: #FFFFFF;
+            border: 1px solid #E7ECF1;
+            border-radius: 16px;
+            padding: 7px;
 
-    </style>
-    """,
+            box-shadow:
+                0px 3px 12px rgba(22, 45, 66, 0.05);
+        }
+
+
+        /* ===================================================
+           DATAFRAME
+           =================================================== */
+
+        [data-testid="stDataFrame"] {
+            background-color: #FFFFFF;
+            border-radius: 14px;
+
+            box-shadow:
+                0px 3px 12px rgba(22, 45, 66, 0.05);
+        }
+
+
+        /* ===================================================
+           DIVISORES
+           =================================================== */
+
+        hr {
+            border: none;
+            border-top: 1px solid #E7ECF1;
+            margin-top: 28px;
+            margin-bottom: 28px;
+        }
+
+
+        /* ===================================================
+           RODAPÉ
+           =================================================== */
+
+        .carevision-footer {
+            text-align: center;
+            color: #8291A1;
+            font-size: 12px;
+            padding-top: 15px;
+            padding-bottom: 10px;
+        }
+
+        </style>
+        """
+    ),
     unsafe_allow_html=True
 )
 
@@ -420,14 +429,29 @@ def obter_estilo_pressao(nivel):
     )
 
 
+def renderizar_html(conteudo):
+    """
+    Renderiza blocos HTML personalizados no Streamlit.
+
+    O dedent remove a indentação existente nas strings
+    multilinha, evitando que o Streamlit interprete
+    o HTML como um bloco de código Markdown.
+    """
+
+    st.markdown(
+        dedent(conteudo),
+        unsafe_allow_html=True
+    )
+
+
 # ============================================================
 # 6. CABEÇALHO PRINCIPAL
 # ============================================================
 
-# Criamos um cabeçalho próprio em HTML para substituir
-# o título padrão do Streamlit.
+# Utilizamos HTML personalizado para criar um cabeçalho
+# mais profissional do que o título padrão do Streamlit.
 
-st.markdown(
+renderizar_html(
     """
     <div class="carevision-header">
 
@@ -444,8 +468,7 @@ st.markdown(
         </p>
 
     </div>
-    """,
-    unsafe_allow_html=True
+    """
 )
 
 
@@ -582,11 +605,9 @@ ranking_valido = ranking_valido.sort_values(
 
 # Criamos uma posição sequencial apenas para exibição.
 
-ranking_valido["posicao_dashboard"] = (
-    range(
-        1,
-        len(ranking_valido) + 1
-    )
+ranking_valido["posicao_dashboard"] = range(
+    1,
+    len(ranking_valido) + 1
 )
 
 
@@ -619,23 +640,29 @@ else:
 # 10. IDENTIFICAÇÃO DA ANÁLISE
 # ============================================================
 
-st.markdown(
-    '<div class="section-label">VISÃO GERAL</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    """
+    <div class="section-label">
+        VISÃO GERAL
+    </div>
+    """
 )
 
-st.markdown(
-    f'<div class="section-title">'
-    f'{uf_selecionada} • {periodo_selecionado}'
-    f'</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    f"""
+    <div class="section-title">
+        {uf_selecionada} • {periodo_selecionado}
+    </div>
+    """
 )
 
-st.markdown(
-    '<div class="section-description">'
-    'Indicadores hospitalares e posição relativa no período selecionado.'
-    '</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    """
+    <div class="section-description">
+        Indicadores hospitalares e posição relativa
+        no período selecionado.
+    </div>
+    """
 )
 
 
@@ -686,7 +713,7 @@ col1, col2, col3, col4, col5 = st.columns(
 
 with col1:
 
-    st.markdown(
+    renderizar_html(
         f"""
         <div class="kpi-card">
 
@@ -703,8 +730,7 @@ with col1:
             </div>
 
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
@@ -714,7 +740,7 @@ with col1:
 
 with col2:
 
-    st.markdown(
+    renderizar_html(
         f"""
         <div class="kpi-card">
 
@@ -731,8 +757,7 @@ with col2:
             </div>
 
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
@@ -742,7 +767,7 @@ with col2:
 
 with col3:
 
-    st.markdown(
+    renderizar_html(
         f"""
         <div class="kpi-card">
 
@@ -759,8 +784,7 @@ with col3:
             </div>
 
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
@@ -770,7 +794,7 @@ with col3:
 
 with col4:
 
-    st.markdown(
+    renderizar_html(
         f"""
         <div class="kpi-card">
 
@@ -787,8 +811,7 @@ with col4:
             </div>
 
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
@@ -798,18 +821,14 @@ with col4:
 
 with col5:
 
-    st.markdown(
+    renderizar_html(
         f"""
         <div
             class="status-card"
             style="
-                background-color:
-                    {estilo_pressao['fundo']};
-                border:
-                    1px solid
-                    {estilo_pressao['borda']};
-                color:
-                    {estilo_pressao['texto']};
+                background-color: {estilo_pressao['fundo']};
+                border: 1px solid {estilo_pressao['borda']};
+                color: {estilo_pressao['texto']};
             "
         >
 
@@ -826,8 +845,7 @@ with col5:
             </div>
 
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
@@ -865,7 +883,7 @@ with contexto1:
 
         valor_variacao = "Sem dado"
 
-    st.markdown(
+    renderizar_html(
         f"""
         <div class="context-card">
 
@@ -882,8 +900,7 @@ with contexto1:
             </div>
 
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
@@ -893,7 +910,7 @@ with contexto1:
 
 with contexto2:
 
-    st.markdown(
+    renderizar_html(
         f"""
         <div class="context-card">
 
@@ -910,8 +927,7 @@ with contexto2:
             </div>
 
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
@@ -925,7 +941,7 @@ with contexto3:
         ranking_valido
     )
 
-    st.markdown(
+    renderizar_html(
         f"""
         <div class="context-card">
 
@@ -942,8 +958,7 @@ with contexto3:
             </div>
 
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 
@@ -953,23 +968,29 @@ with contexto3:
 
 st.divider()
 
-st.markdown(
-    '<div class="section-label">EVOLUÇÃO TEMPORAL</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    """
+    <div class="section-label">
+        EVOLUÇÃO TEMPORAL
+    </div>
+    """
 )
 
-st.markdown(
-    f'<div class="section-title">'
-    f'Internações em {uf_selecionada}'
-    f'</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    f"""
+    <div class="section-title">
+        Internações em {uf_selecionada}
+    </div>
+    """
 )
 
-st.markdown(
-    '<div class="section-description">'
-    'Comportamento mensal das internações ao longo da série disponível.'
-    '</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    """
+    <div class="section-description">
+        Comportamento mensal das internações ao longo
+        da série disponível.
+    </div>
+    """
 )
 
 
@@ -1059,23 +1080,29 @@ st.plotly_chart(
 
 st.divider()
 
-st.markdown(
-    '<div class="section-label">COMPARAÇÃO NACIONAL</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    """
+    <div class="section-label">
+        COMPARAÇÃO NACIONAL
+    </div>
+    """
 )
 
-st.markdown(
-    f'<div class="section-title">'
-    f'UFs com maior pressão • {periodo_selecionado}'
-    f'</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    f"""
+    <div class="section-title">
+        UFs com maior pressão • {periodo_selecionado}
+    </div>
+    """
 )
 
-st.markdown(
-    '<div class="section-description">'
-    'Top 10 Unidades da Federação segundo o Índice de Pressão Hospitalar.'
-    '</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    """
+    <div class="section-description">
+        Top 10 Unidades da Federação segundo o
+        Índice de Pressão Hospitalar.
+    </div>
+    """
 )
 
 
@@ -1223,23 +1250,29 @@ st.plotly_chart(
 
 st.divider()
 
-st.markdown(
-    '<div class="section-label">DETALHAMENTO</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    """
+    <div class="section-label">
+        DETALHAMENTO
+    </div>
+    """
 )
 
-st.markdown(
-    f'<div class="section-title">'
-    f'Visão Analítica Nacional • {periodo_selecionado}'
-    f'</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    f"""
+    <div class="section-title">
+        Visão Analítica Nacional • {periodo_selecionado}
+    </div>
+    """
 )
 
-st.markdown(
-    '<div class="section-description">'
-    'Indicadores consolidados das Unidades da Federação no período selecionado.'
-    '</div>',
-    unsafe_allow_html=True
+renderizar_html(
+    """
+    <div class="section-description">
+        Indicadores consolidados das Unidades da Federação
+        no período selecionado.
+    </div>
+    """
 )
 
 
@@ -1385,7 +1418,7 @@ with st.expander(
 # 18. RODAPÉ
 # ============================================================
 
-st.markdown(
+renderizar_html(
     """
     <div class="carevision-footer">
 
@@ -1395,6 +1428,5 @@ st.markdown(
         SIH/SUS • CNES • IBGE
 
     </div>
-    """,
-    unsafe_allow_html=True
+    """
 )
