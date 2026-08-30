@@ -334,9 +334,174 @@ st.plotly_chart(
     grafico_internacoes,
     use_container_width=True
 )
-
 # ============================================================
-# 11. OBSERVAÇÃO METODOLÓGICA
+# 11. RANKING NACIONAL DE PRESSÃO HOSPITALAR
+# ============================================================
+
+# Vamos comparar todas as UFs dentro do período
+# selecionado pelo usuário na barra lateral.
+#
+# Diferente do gráfico histórico, que usa apenas uma UF,
+# este ranking considera todas as UFs disponíveis naquele mês.
+
+ranking_periodo = dados[
+    dados["periodo"] == periodo_selecionado
+].copy()
+
+
+# ------------------------------------------------------------
+# REMOÇÃO DE REGISTROS SEM ÍNDICE
+# ------------------------------------------------------------
+
+# Alguns registros podem não possuir Índice de Pressão
+# calculado, como acontece quando faltam dados de internações.
+#
+# Para o ranking, utilizamos somente registros com
+# indice_pressao válido.
+
+ranking_periodo = ranking_periodo.dropna(
+    subset=["indice_pressao"]
+)
+
+
+# ------------------------------------------------------------
+# ORDENAÇÃO DO RANKING
+# ------------------------------------------------------------
+
+# Ordenamos da maior para a menor pressão hospitalar.
+
+ranking_periodo = ranking_periodo.sort_values(
+    "indice_pressao",
+    ascending=False
+)
+
+
+# ------------------------------------------------------------
+# SELEÇÃO DAS 10 UFs COM MAIOR ÍNDICE
+# ------------------------------------------------------------
+
+# Para manter o dashboard visualmente claro,
+# mostramos apenas as 10 UFs com maior Índice de Pressão.
+
+top_10 = ranking_periodo.head(10).copy()
+
+
+# ------------------------------------------------------------
+# ORGANIZAÇÃO PARA O GRÁFICO HORIZONTAL
+# ------------------------------------------------------------
+
+# Invertemos a ordem das 10 UFs para que
+# a maior pontuação apareça no topo do gráfico horizontal.
+
+top_10 = top_10.sort_values(
+    "indice_pressao",
+    ascending=True
+)
+
+
+# ------------------------------------------------------------
+# TÍTULO DA SEÇÃO
+# ------------------------------------------------------------
+
+st.divider()
+
+st.subheader(
+    f"🏆 Ranking de Pressão Hospitalar — {periodo_selecionado}"
+)
+
+st.caption(
+    "Top 10 Unidades da Federação com maior Índice de Pressão "
+    "Hospitalar no período selecionado."
+)
+
+
+# ------------------------------------------------------------
+# CRIAÇÃO DO GRÁFICO
+# ------------------------------------------------------------
+
+# Criamos um gráfico horizontal.
+#
+# Eixo X:
+# Índice de Pressão Hospitalar.
+#
+# Eixo Y:
+# Unidade da Federação.
+#
+# A classificação de pressão também será utilizada
+# para diferenciar visualmente as barras.
+
+grafico_ranking = px.bar(
+    top_10,
+    x="indice_pressao",
+    y="uf",
+    orientation="h",
+    color="nivel_pressao",
+
+    # Informações adicionais exibidas quando
+    # o usuário passa o mouse sobre uma barra.
+    hover_data={
+        "internacoes": ":,.0f",
+        "leitos_sus": ":,.0f",
+        "internacoes_por_leito": ":.2f",
+        "variacao_percentual": ":.2f",
+        "indice_pressao": ":.1f"
+    },
+
+    labels={
+        "indice_pressao": "Índice de Pressão",
+        "uf": "UF",
+        "nivel_pressao": "Nível de Pressão",
+        "internacoes": "Internações",
+        "leitos_sus": "Leitos SUS",
+        "internacoes_por_leito": "Internações / leito",
+        "variacao_percentual": "Variação mensal (%)"
+    }
+)
+
+
+# ------------------------------------------------------------
+# CONFIGURAÇÃO VISUAL
+# ------------------------------------------------------------
+
+grafico_ranking.update_layout(
+
+    # Remove o título interno.
+    # Já usamos um título do Streamlit acima.
+    title_text="",
+
+    # Define os nomes dos eixos.
+    xaxis_title="Índice de Pressão Hospitalar",
+    yaxis_title="",
+
+    # Posiciona a legenda acima do gráfico.
+    legend_title_text="Nível de Pressão"
+)
+
+
+# ------------------------------------------------------------
+# ESCALA DO ÍNDICE
+# ------------------------------------------------------------
+
+# Como o IPH varia de 0 a 100,
+# fixamos o eixo X nessa mesma escala.
+#
+# Isso facilita a comparação visual entre períodos.
+
+grafico_ranking.update_xaxes(
+    range=[0, 100]
+)
+
+
+# ------------------------------------------------------------
+# EXIBIÇÃO DO GRÁFICO
+# ------------------------------------------------------------
+
+st.plotly_chart(
+    grafico_ranking,
+    use_container_width=True
+)
+# ============================================================
+# 12. OBSERVAÇÃO METODOLÓGICA
 # ============================================================
 
 st.divider()
