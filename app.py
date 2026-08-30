@@ -25,9 +25,17 @@ st.set_page_config(
 # 3. CARREGAMENTO DA BASE
 # ============================================================
 
-# Carrega a base analítica criada nas Fases 1 e 2.
+# ============================================================
+# CARREGAMENTO DA BASE ANALÍTICA
+# ============================================================
+
+# No Streamlit Cloud, o arquivo CSV está no mesmo diretório
+# do app.py dentro do repositório do GitHub.
+#
+# Por isso, usamos apenas o nome do arquivo,
+# sem o caminho "/content/" que era específico do Google Colab.
 dados = pd.read_csv(
-    "/content/carevision_base_final.csv",
+    "carevision_base_final.csv",
     encoding="utf-8-sig"
 )
 
