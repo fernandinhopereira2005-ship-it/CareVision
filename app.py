@@ -9,6 +9,10 @@ import streamlit as st
 # Pandas será utilizado para carregar e filtrar os dados.
 import pandas as pd
 
+# Plotly Express será utilizado para criar
+# os gráficos interativos do CareVision.
+import plotly.express as px
+
 
 # ============================================================
 # 2. CONFIGURAÇÃO DA PÁGINA
@@ -245,10 +249,81 @@ else:
         "Não há informação suficiente para calcular "
         "a variação em relação ao mês anterior."
     )
+# ============================================================
+# 10. EVOLUÇÃO HISTÓRICA DAS INTERNAÇÕES
+# ============================================================
 
+# Selecionamos todos os meses disponíveis para a UF
+# escolhida pelo usuário no filtro lateral.
+historico_uf = dados[
+    dados["uf"] == uf_selecionada
+].copy()
+
+# Organizamos os registros em ordem cronológica.
+historico_uf = historico_uf.sort_values("data")
+
+
+# ------------------------------------------------------------
+# TÍTULO DO GRÁFICO
+# ------------------------------------------------------------
+
+st.divider()
+
+st.subheader(
+    f"📊 Evolução das internações — {uf_selecionada}"
+)
+
+
+# ------------------------------------------------------------
+# CRIAÇÃO DO GRÁFICO
+# ------------------------------------------------------------
+
+# Criamos um gráfico de linha interativo.
+#
+# Cada ponto representa o número de internações
+# registrado em determinado mês.
+
+grafico_internacoes = px.line(
+    historico_uf,
+    x="data",
+    y="internacoes",
+    markers=True,
+    labels={
+        "data": "Período",
+        "internacoes": "Internações"
+    }
+)
+
+
+# ------------------------------------------------------------
+# CONFIGURAÇÃO DO GRÁFICO
+# ------------------------------------------------------------
+
+# O modo "x unified" permite visualizar os valores
+# ao passar o mouse sobre determinado período.
+
+grafico_internacoes.update_layout(
+    title=None,
+    xaxis_title="Período",
+    yaxis_title="Internações",
+    hovermode="x unified"
+)
+
+
+# ------------------------------------------------------------
+# EXIBIÇÃO NO DASHBOARD
+# ------------------------------------------------------------
+
+# Exibe o gráfico utilizando toda a largura
+# disponível na página do CareVision.
+
+st.plotly_chart(
+    grafico_internacoes,
+    use_container_width=True
+)
 
 # ============================================================
-# 10. OBSERVAÇÃO METODOLÓGICA
+# 11. OBSERVAÇÃO METODOLÓGICA
 # ============================================================
 
 st.divider()
