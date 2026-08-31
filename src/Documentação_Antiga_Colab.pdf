@@ -1,0 +1,117 @@
+CareVision
+Documentação das Fases 1 e 2
+Coleta, tratamento, integração e construção dos indicadores do MVP
+
+Sprint 2 — MVP preliminar
+Período de dados analisado: junho/2025 a junho/2026
+ 
+1. Visão geral
+O CareVision é uma solução analítica voltada ao acompanhamento da pressão sobre a capacidade hospitalar nas Unidades da Federação brasileiras. Nesta etapa do projeto, foram reunidas e integradas bases públicas de internações, leitos hospitalares do SUS e população, formando uma base consolidada para cálculo de indicadores e geração de um Índice de Pressão Hospitalar.
+1.1 Objetivo das Fases 1 e 2
+Construir o pipeline de dados do MVP, desde a obtenção das bases públicas até a geração de uma base analítica única, padronizada e preparada para alimentar o dashboard e as demais evidências visuais da Sprint 2.
+2. Fase 1 — Coleta de dados
+A primeira fase concentrou-se na seleção das fontes, definição do recorte temporal e obtenção dos arquivos necessários. Foram utilizados dados públicos de três fontes oficiais.
+Fonte	Informação utilizada	Granularidade	Uso no CareVision
+SIH/SUS – DATASUS	Internações hospitalares	UF / mês	Representar a demanda hospitalar
+CNES – DATASUS	Quantidade de leitos SUS	UF / mês	Representar a capacidade hospitalar
+IBGE	População estimada	UF	Normalização dos indicadores populacionais
+2.1 Recorte temporal
+As bases mensais foram alinhadas para o mesmo intervalo de 13 meses, de junho de 2025 a junho de 2026. Esse alinhamento foi necessário para permitir comparações temporais consistentes entre internações e disponibilidade de leitos.
+2.2 Base SIH/SUS
+A base de internações foi obtida no DATASUS e organizada por Unidade da Federação e mês de competência. Após a leitura inicial, foram identificadas linhas correspondentes às 27 UFs e 13 competências mensais.
+2.3 Base CNES
+A base do Cadastro Nacional de Estabelecimentos de Saúde (CNES) foi utilizada para obter a quantidade de leitos SUS por Unidade da Federação. O mesmo intervalo mensal adotado no SIH/SUS foi utilizado, garantindo compatibilidade temporal entre demanda e capacidade.
+2.4 Base IBGE
+Foi utilizada a estimativa populacional do IBGE referente a 2025. A população foi associada a cada Unidade da Federação e utilizada como denominador nos indicadores por 100 mil habitantes.
+3. Fase 2 — Tratamento e padronização
+As três bases possuíam estruturas diferentes. Por isso, a Fase 2 realizou limpeza, transformação e padronização antes da integração.
+•	Filtragem das UFs: Foram mantidas somente as linhas correspondentes aos códigos numéricos das 27 Unidades da Federação.
+•	Separação do código e nome: O código da UF foi extraído para uma coluna própria e o nome foi padronizado em outra coluna.
+•	Transformação wide → long: As colunas mensais foram convertidas em registros, criando uma linha para cada combinação UF/período.
+•	Padronização temporal: Foram criados ano, mês, número do mês e uma coluna de data para ordenar e relacionar as observações.
+•	Conversão numérica: Internações, leitos e população foram tratados como valores numéricos para permitir os cálculos.
+•	Validação: Foram verificadas dimensões, valores ausentes e duplicidades por UF/período.
+3.1 Resultado da transformação
+Após a transformação das bases mensais, SIH/SUS e CNES passaram a possuir 351 registros cada, resultado de 27 UFs × 13 meses. Essa estrutura tornou possível integrar as informações por Unidade da Federação e período.
+4. Integração das bases
+As bases tratadas foram integradas utilizando o código da Unidade da Federação e o período como chaves para SIH/SUS e CNES. A população do IBGE foi posteriormente associada pelo código da UF. O resultado foi uma base analítica consolidada com 351 registros.
+A verificação de qualidade não identificou registros duplicados por UF/período. Foram encontrados dois valores ausentes de internações no período 2026/Jun: Acre e Roraima. Esses casos foram preservados como ausência de dado, evitando a criação artificial de valores.
+5. Engenharia de atributos e indicadores
+A partir da base integrada foram criadas métricas capazes de comparar demanda, capacidade e evolução temporal entre UFs.
+Indicador	Cálculo	Finalidade
+Internações por 100 mil habitantes	(internações / população) × 100.000	Normaliza a demanda pela população.
+Leitos SUS por 100 mil habitantes	(leitos SUS / população) × 100.000	Permite comparar capacidade entre UFs de tamanhos diferentes.
+Internações por leito	internações / leitos SUS	Relaciona diretamente demanda hospitalar e capacidade disponível.
+Variação mensal de internações	internações do mês − internações do mês anterior	Mostra aumento ou redução absoluta da demanda.
+Variação percentual	variação mensal / internações do mês anterior × 100	Mostra a intensidade relativa da mudança mensal.
+6. Índice de Pressão Hospitalar
+Foi construído um índice sintético denominado Índice de Pressão Hospitalar. Ele consolida variáveis de demanda, capacidade e comportamento recente das internações em uma escala de 0 a 100, permitindo ordenar as UFs e classificá-las por nível de pressão. O notebook mantém os componentes intermediários do cálculo, como scores de demanda e capacidade, possibilitando rastreabilidade do indicador.
+6.1 Classificação
+Os registros foram classificados em níveis de pressão: Baixa, Moderada, Alta e Crítica. Quando os dados necessários ao cálculo não estavam disponíveis, o registro recebeu a indicação “Sem dado”.
+6.2 Validação observada
+Foram calculados 349 índices válidos. Dois registros permaneceram sem índice em razão da ausência de internações para Acre e Roraima em junho de 2026.
+Distribuição dos 351 registros: 124 Alta, 122 Moderada, 59 Crítica, 44 Baixa e 2 Sem dado.
+6.3 Metodologia de cálculo do índice
+O Índice de Pressão Hospitalar (IPH) foi construído como uma métrica comparativa experimental do CareVision. Seu objetivo é sintetizar, em uma escala de 0 a 100, três dimensões: pressão da demanda em relação à capacidade, demanda proporcional à população e tendência recente das internações.
+Componente 1 — Demanda em relação à capacidade (peso de 50%)
+Primeiro é calculada a razão internações por leito: internações do mês ÷ leitos SUS do mês. Esse indicador funciona como uma proxy de carga/pressão relativa sobre a capacidade disponível. Em cada mês, as UFs são comparadas entre si por posição percentual (ranking percentual). O componente recebeu peso de 50% por representar diretamente a relação entre demanda observada e capacidade hospitalar disponível na base.
+Componente 2 — Demanda proporcional à população (peso de 30%)
+É utilizado o indicador internações por 100 mil habitantes, calculado por: (internações ÷ população) × 100.000. A normalização populacional permite comparar UFs de tamanhos diferentes. Assim como no primeiro componente, as UFs são posicionadas relativamente às demais no mesmo mês. Esse componente representa 30% do IPH.
+Componente 3 — Tendência das internações (peso de 20%)
+A tendência é representada pela variação percentual das internações em relação ao mês anterior: [(internações atuais − internações do mês anterior) ÷ internações do mês anterior] × 100. O componente busca capturar aceleração recente da demanda. Para o primeiro mês da série, em que não existe mês anterior, o tratamento adotado no protótipo evita interpretar a ausência de histórico como crescimento ou queda real. Esse componente representa 20% do índice.
+6.4 Fórmula do IPH
+IPH = [0,50 × Score(demanda/capacidade) + 0,30 × Score(demanda/população) + 0,20 × Score(tendência)] × 100
+Os scores são relativos ao conjunto de UFs observado em cada mês. Portanto, o IPH deve ser interpretado principalmente como uma medida comparativa: uma pontuação elevada indica que a UF se encontra em posição de maior pressão relativa quando comparada às demais UFs naquele período.
+6.5 Faixas de classificação
+Faixa do IPH	Classificação	Interpretação no MVP
+Abaixo de 25	Baixa	Menor pressão relativa
+25 a abaixo de 50	Moderada	Pressão relativa intermediária
+50 a abaixo de 75	Alta	Pressão relativa elevada
+75 a 100	Crítica	Maior pressão relativa
+Sem índice calculável	Sem dado	Informação insuficiente para calcular o IPH
+6.6 Limitações e interpretação correta
+Os pesos de 50%, 30% e 20%, assim como as faixas de classificação, são escolhas heurísticas definidas para o MVP e não parâmetros oficiais do Ministério da Saúde, DATASUS, CNES ou IBGE. O índice não foi clinicamente validado e não deve ser utilizado isoladamente para decisões assistenciais.
+A razão 'internações por leito' NÃO corresponde à taxa de ocupação hospitalar. Ela é utilizada somente como proxy de carga/pressão. Uma taxa de ocupação real exigiria informações operacionais adicionais, como leitos-dia disponíveis e pacientes-dia, que não fazem parte da base utilizada.
+Também deve ser considerado que os dados de internações do SIH/SUS representam internações registradas/pagas no âmbito do SUS e não necessariamente todas as internações ocorridas no Brasil. Além disso, a população estimada para 2025 foi reutilizada nos meses de 2026 como simplificação do MVP.
+7. Resultado analítico do período mais recente
+No ranking referente a junho de 2026, as maiores pontuações do Índice de Pressão Hospitalar observadas no notebook foram:
+Ranking	UF	Índice	Nível
+1	Santa Catarina	97,2	Crítica
+2	Paraná	87,6	Crítica
+3	Espírito Santo	85,6	Crítica
+4	Distrito Federal	82,0	Crítica
+5	Rio Grande do Sul	81,2	Crítica
+6	Amapá	80,0	Crítica
+7	São Paulo	77,2	Crítica
+8	Mato Grosso do Sul	72,8	Alta
+9	Ceará	58,8	Alta
+10	Rio de Janeiro	55,6	Alta
+8. Pipeline implementado
+O pipeline implementado nas Fases 1 e 2 pode ser resumido da seguinte forma:
+SIH/SUS (internações)  +  CNES (leitos SUS)  +  IBGE (população)
+↓
+Limpeza e padronização
+↓
+Transformação temporal
+↓
+Integração por UF/período
+↓
+Indicadores derivados
+↓
+Índice de Pressão Hospitalar
+↓
+Ranking e base analítica final
+9. Evidências produzidas
+•	Notebook CareVision_Tratamento_Dados.ipynb com o pipeline de tratamento e análise comentado.
+•	Base consolidada carevision_base_final.csv.
+•	Tabelas de validação das bases e dos valores ausentes.
+•	Indicadores de internações, leitos e pressão hospitalar.
+•	Ranking das UFs.
+•	Gráfico das UFs com maior Índice de Pressão Hospitalar.
+10. Base final
+Ao final da Fase 2 foi exportado o arquivo carevision_base_final.csv, contendo 351 registros e 19 colunas. Essa base reúne as variáveis originais tratadas, os atributos temporais e os indicadores derivados e será utilizada como entrada da próxima etapa do MVP.
+11. Próxima etapa
+A Fase 3 será dedicada à construção da camada visual do MVP. A base final será utilizada para criar um dashboard interativo com filtros por UF e período, KPIs, gráficos de evolução, ranking e visualização do nível de pressão hospitalar. Essa interface também servirá como principal demonstração hands-on no vídeo pitch da Sprint 2.
+12. Observações metodológicas
+O Índice de Pressão Hospitalar é um indicador analítico desenvolvido no contexto do projeto CareVision e não corresponde a um índice oficial do DATASUS, CNES ou IBGE. As fontes públicas fornecem os dados de entrada; a integração, os indicadores derivados e a classificação de pressão fazem parte da solução proposta pelo grupo.
+A estimativa populacional utilizada é referente a 2025 e foi aplicada aos registros do intervalo analisado. Essa escolha deve ser registrada como uma simplificação metodológica do MVP.
